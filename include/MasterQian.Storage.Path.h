@@ -201,9 +201,13 @@ namespace MasterQian::Storage {
 
 		Path& operator /= (std::wstring_view name) noexcept {
 			if (mData.size() < PATH_MAX_LENGTH) {
-				mData.push_back(PATH_SLASH);
+				if (!mData.empty()) {
+					mData.push_back(PATH_SLASH);
+				}
 				auto cur_size{ mData.size() }, append_size{ name.size() };
-				if (append_size + cur_size > PATH_MAX_LENGTH) append_size = PATH_MAX_LENGTH - cur_size;
+				if (append_size + cur_size > PATH_MAX_LENGTH) {
+					append_size = PATH_MAX_LENGTH - cur_size;
+				}
 				mData.append(name.data(), append_size);
 				RemoveBackClash();
 			}
@@ -436,10 +440,14 @@ namespace MasterQian::Storage {
 		/// <summary>
 		/// 重命名，支持文件或目录的调用
 		/// </summary>
-		/// <param name="name">新名称，会自动补充父路径，无需包含父路径</param>
+		/// <param name="name">新名称，会自动补充父路径与拓展名，无需包含父路径与拓展名</param>
 		/// <returns>是否成功</returns>
 		bool Rename(std::wstring_view name) const noexcept {
-			return details::MasterQian_Storage_Path_Rename(mData.data(), Parent().Concat(name).mData.data());
+			Path new_path{ Parent() };
+			std::wstring new_name{ name };
+			new_name += Extension();
+			new_path /= new_name;
+			return details::MasterQian_Storage_Path_Rename(mData.data(), new_path.mData.data());
 		}
 
 		/// <summary>
