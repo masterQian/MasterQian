@@ -27,6 +27,7 @@ using namespace System;
 using namespace Tool;
 #endif
 
+#include "../include/MasterQian.Bin.h"
 #include "../include/MasterQian.System.Log.h"
 
 using namespace MasterQian;

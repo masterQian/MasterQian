@@ -183,14 +183,14 @@ namespace MasterQian::Parser {
 		/// <param name="key">配置名</param>
 		/// <param name="default_value">默认值</param>
 		/// <returns>配置值</returns>
-		[[nodiscard]] std::wstring get(std::wstring_view key, std::wstring default_value = { }) const noexcept {
+		[[nodiscard]] std::wstring get(std::wstring_view key, std::wstring_view default_value = { }) const noexcept {
 			if (auto iter{ find(key) }; iter != cend()) {
 				auto data{ reinterpret_cast<mqcstr>(iter->second.data()) };
 				auto count{ iter->second.size() / sizeof(mqchar) };
 				return { data, data + count };
 			}
 			else {
-				return default_value;
+				return std::wstring{ default_value };
 			}
 		}
 
@@ -200,12 +200,12 @@ namespace MasterQian::Parser {
 		/// <param name="key">配置名</param>
 		/// <param name="default_value">默认值</param>
 		/// <returns>配置值</returns>
-		[[nodiscard]] Bin get_bin(std::wstring_view key, Bin default_value = { }) const noexcept {
+		[[nodiscard]] Bin get_bin(std::wstring_view key, BinView default_value = { }) const noexcept {
 			if (auto iter{ find(key) }; iter != cend()) {
 				return iter->second;
 			}
 			else {
-				return default_value;
+				return Bin{ default_value };
 			}
 		}
 
@@ -215,7 +215,7 @@ namespace MasterQian::Parser {
 		/// <param name="key">配置名</param>
 		/// <param name="default_value">默认值</param>
 		/// <returns>配置值</returns>
-		[[nodiscard]] Config get_config(std::wstring_view key, Config default_value = { }) const noexcept {
+		[[nodiscard]] Config get_config(std::wstring_view key, Config const& default_value = { }) const noexcept {
 			if (auto iter{ find(key) }; iter != cend()) {
 				return Config(iter->second);
 			}

@@ -7,8 +7,28 @@
 #define MasterQianModuleVersion 20240127ULL
 #undef MasterQianModuleVersion
 
+
+/*  --------------------  参数包  --------------------  */
+/// <summary>
+/// <para>Args - 参数包</para>
+/// <para>将多个不同winrt运行时类型打包成一个方便参数传递, 且使用结构化绑定更方便解包</para>
+/// <example>
+/// <code>
+/// <para>auto args { Args::box(1, 2.5, L"Something", winrt::Windows::UI::Xaml::Controls::Button{}) };</para>
+/// <para>auto [arg1, _, arg3] = args.unbox&lt;int, void, winrt::hstring&gt;(); </para>
+/// </code>
+/// <para>
+/// 在此例中将整数, 浮点数, 字符串, 按钮这多个不同类型自动包装并打包成一个运行时类型, 
+/// 可以将此类型传递到诸如事件函数中的参数、控件的Tag中等等, 
+/// 通过显示指定unbox的模板类型来解包, 数量并不一定需要完全相同, 只要不超过原参数包的大小,
+/// 且可以通过void类型来指定某个不关心的参数忽略掉
+/// </para>
+/// </example>
+/// </summary>
+
 namespace MasterQian::WinRT {
     struct Args;
+
     namespace details {
         struct ArgsImpl;
 
@@ -28,6 +48,7 @@ namespace winrt::impl {
             virtual mqi32 __stdcall Append(Windows::Foundation::IInspectable const&) noexcept = 0;
             virtual mqi32 __stdcall GetAt(mqui32, Windows::Foundation::IInspectable*) noexcept = 0;
             virtual mqi32 __stdcall GetAll(Windows::Foundation::IInspectable**) noexcept = 0;
+            virtual mqi32 __stdcall SetAt(mqui32, Windows::Foundation::IInspectable const&) noexcept = 0;
         };
     };
 
@@ -62,26 +83,19 @@ namespace winrt::impl {
             return 0;
         }
         catch (...) { return to_hresult(); }
+
+        mqi32 __stdcall SetAt(mqui32 index, Windows::Foundation::IInspectable const& obj) noexcept final try {
+            MasterQian::WinRT::details::ArgsImpl& args{ this->shim() };
+            typename D::abi_guard guard(args);
+            args.objects[index] = obj;
+            return 0;
+        }
+        catch (...) { return to_hresult(); }
     };
 }
 
 namespace MasterQian::WinRT {
-    /// <summary>
-    /// <para>Args - 多参列表</para>
-    /// <para>将多个不同winrt运行时类型打包成一个方便参数传递, 且使用结构化绑定更方便解包</para>
-    /// <example>
-    /// <code>
-    /// <para>auto args { Args::box(1, 2.5, L"Something", winrt::Windows::UI::Xaml::Controls::Button{}) };</para>
-    /// <para>auto [arg1, _, arg3] = args.unbox&lt;int, void, winrt::hstring&gt;(); </para>
-    /// </code>
-    /// <para>
-    /// 在此例中将整数, 浮点数, 字符串, 按钮这多个不同类型自动包装并打包成一个运行时类型, 
-    /// 可以将此类型传递到诸如事件函数中的参数、控件的Tag中等等, 
-    /// 通过显示指定unbox的模板类型来解包, 数量并不一定需要完全相同, 只要不超过原参数包的大小,
-    /// 且可以通过void类型来指定某个不关心的参数忽略掉
-    /// </para>
-    /// </example>
-    /// </summary>
+    // 参数包
     struct Args : winrt::Windows::Foundation::IInspectable {
     private:
         using this_abi = winrt::impl::abi_t<Args>;
@@ -130,10 +144,16 @@ namespace MasterQian::WinRT {
             return result;
         }
 
-        [[nodiscard]] winrt::Windows::Foundation::IInspectable operator [] (mqui32 index) const {
+        template<typename U>
+        [[nodiscard]] U get(mqui32 index) const {
             winrt::Windows::Foundation::IInspectable result;
             winrt::check_hresult((*(this_abi**)this)->GetAt(index, &result));
-            return result;
+            return Args::unbox_arg<U>(result);
+        }
+
+        template<typename U>
+        void set(mqui32 index, U&& u) {
+            winrt::check_hresult((*(this_abi**)this)->SetAt(index, Args::box_arg(std::forward<U>(u))));
         }
 
         template<typename... T>
@@ -159,4 +179,24 @@ namespace MasterQian::WinRT {
     }
 
     inline Args::Args() : Args{ winrt::make<details::ArgsImpl>() } {}
+}
+
+
+/*  --------------------  子页面  --------------------*/
+
+namespace MasterQian::WinRT {
+    // 子页面
+    template<std::derived_from<winrt::Windows::Foundation::IInspectable> T, typename U>
+    struct SubPage : T {
+        SubPage() = default;
+        static U* From(winrt::Windows::Foundation::IInspectable* subPage) noexcept {
+            return reinterpret_cast<U*>(subPage);
+        }
+
+        template<typename D>
+        void Bind(D& d, winrt::hstring const& name) const noexcept {
+            d = reinterpret_cast<U const*>(this)->FindName(name).as<D>();
+        }
+    };
+    using SubPageFunc = void(*)(winrt::Windows::Foundation::IInspectable*) noexcept;
 }
