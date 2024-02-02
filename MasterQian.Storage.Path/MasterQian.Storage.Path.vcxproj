@@ -83,10 +83,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\include\MasterQian.freestanding.ixx" />
     <ClCompile Include="MasterQian.Storage.Path.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\include\MasterQian.Storage.Path.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

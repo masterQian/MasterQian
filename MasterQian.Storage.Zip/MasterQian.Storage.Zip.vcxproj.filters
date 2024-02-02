@@ -2,9 +2,9 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="MasterQian.Storage.Zip.cpp" />
+    <ClCompile Include="..\include\MasterQian.freestanding.ixx" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\MasterQian.Storage.Zip.h" />
     <ClInclude Include="ioapi.h" />
     <ClInclude Include="unzip.h" />
     <ClInclude Include="zconf.h" />

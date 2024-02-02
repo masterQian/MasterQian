@@ -2,8 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="MasterQian.Storage.Path.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\include\MasterQian.Storage.Path.h" />
+    <ClCompile Include="..\include\MasterQian.freestanding.ixx" />
   </ItemGroup>
 </Project>

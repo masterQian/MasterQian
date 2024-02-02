@@ -83,10 +83,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\include\MasterQian.freestanding.ixx" />
+    <ClCompile Include="..\include\MasterQian.Media.Color.ixx" />
     <ClCompile Include="MasterQian.Media.GDI.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\include\MasterQian.Media.GDI.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

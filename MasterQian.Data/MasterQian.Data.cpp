@@ -1,37 +1,44 @@
 ﻿#include "../include/MasterQian.Meta.h"
+import MasterQian.freestanding;
+using namespace MasterQian;
+#define MasterQianModuleName(name) MasterQian_Data_##name
+META_EXPORT_API_VERSION(20240131ULL)
 
-#define _AMD64_
-#include <windef.h>
-#include <stringapiset.h>
-#include <wincrypt.h>
+using HCRYPTPROV = mqui64;
+using HCRYPTKEY = mqui64;
+using HCRYPTHASH = mqui64;
+using ALG_ID = mqui32;
 
-#define MasterQianModuleName(_) MasterQian_Data_
-META_EXPORT_API_VERSION(20240116ULL)
+META_WINAPI(mqbool, CryptAcquireContextW, HCRYPTPROV*, mqcstr, mqcstr, mqui32, mqui32);
+META_WINAPI(mqbool, CryptCreateHash, HCRYPTPROV, ALG_ID, HCRYPTKEY, mqui32, HCRYPTHASH*);
+META_WINAPI(mqbool, CryptHashData, HCRYPTHASH, mqcbytes, mqui32, mqui32);
+META_WINAPI(mqbool, CryptGetHashParam, HCRYPTHASH, mqui32, mqbytes, mqui32*, mqui32);
+META_WINAPI(mqbool, CryptDestroyHash, HCRYPTHASH);
+META_WINAPI(mqbool, CryptReleaseContext, HCRYPTPROV, mqui32);
 
-enum class CodePage : mqenum {
-    ANSI = 0U, UTF8 = 65001U
-};
+#pragma comment(linker,"/alternatename:__imp_?CryptAcquireContextW@@YAHPEA_KPEB_W1II@Z=__imp_CryptAcquireContextW")
+#pragma comment(linker,"/alternatename:__imp_?CryptCreateHash@@YAH_KI0IPEA_K@Z=__imp_CryptCreateHash")
+#pragma comment(linker,"/alternatename:__imp_?CryptHashData@@YAH_KPEBEII@Z=__imp_CryptHashData")
+#pragma comment(linker,"/alternatename:__imp_?CryptGetHashParam@@YAH_KIPEAEPEAII@Z=__imp_CryptGetHashParam")
+#pragma comment(linker,"/alternatename:__imp_?CryptDestroyHash@@YAH_K@Z=__imp_CryptDestroyHash")
+#pragma comment(linker,"/alternatename:__imp_?CryptReleaseContext@@YAH_KI@Z=__imp_CryptReleaseContext")
 
-META_EXPORT_API(mqui32, ToStringImpl1, mqcmem data, mqui32 size, CodePage cp) {
-    auto len{ MultiByteToWideChar(static_cast<mqui32>(cp), 0, static_cast<mqcstra>(data),
-        static_cast<mqi32>(size), nullptr, 0) };
+META_EXPORT_API(mqui32, ToStringImpl1, mqcmem data, mqui32 size, mqui32 cp) {
+    auto len{ api::MultiByteToWideChar(cp, 0, static_cast<mqcstra>(data), static_cast<mqi32>(size), nullptr, 0) };
     return len > 0 ? static_cast<mqui32>(len) : 0U;
 }
 
-META_EXPORT_API(void, ToStringImpl2, mqcmem data, mqui32 size, mqstr str, mqui32 len, CodePage cp) {
-    MultiByteToWideChar(static_cast<mqui32>(cp), 0, static_cast<mqcstra>(data),
-        static_cast<mqi32>(size), str, len);
+META_EXPORT_API(void, ToStringImpl2, mqcmem data, mqui32 size, mqstr str, mqui32 len, mqui32 cp) {
+	api::MultiByteToWideChar(cp, 0, static_cast<mqcstra>(data), static_cast<mqi32>(size), str, len);
 }
 
-META_EXPORT_API(mqui32, ToBinImpl1, mqcstr str, mqui32 size, CodePage cp) {
-    auto len{ WideCharToMultiByte(static_cast<mqui32>(cp), 0, str, size,
-        nullptr, 0, nullptr, nullptr) };
+META_EXPORT_API(mqui32, ToBinImpl1, mqcstr str, mqui32 size, mqui32 cp) {
+    auto len{ api::WideCharToMultiByte(cp, 0, str, size, nullptr, 0, nullptr, nullptr) };
     return len > 0 ? static_cast<mqui32>(len) : 0U;
 }
 
-META_EXPORT_API(void, ToBinImpl2, mqcstr str, mqui32 size, mqmem data, mqui32 len, CodePage cp) {
-    WideCharToMultiByte(static_cast<mqui32>(cp), 0, str, size,
-        static_cast<mqstra>(data), len, nullptr, nullptr);
+META_EXPORT_API(void, ToBinImpl2, mqcstr str, mqui32 size, mqmem data, mqui32 len, mqui32 cp) {
+	api::WideCharToMultiByte(cp, 0, str, size, static_cast<mqstra>(data), len, nullptr, nullptr);
 }
 
 META_EXPORT_API(mqui32, GetCRC32, mqcbytes bin, mqui32 len) {
@@ -90,16 +97,16 @@ META_EXPORT_API(mqui32, GetCRC32, mqcbytes bin, mqui32 len) {
 META_EXPORT_API(void, GetMD5, mqcbytes bin, mqui32 len, mqstr md5) {
 	constexpr mqchar MD5DIC[]{ L"0123456789ABCDEF" };
 
-	HCRYPTPROV hCryptProv;
-	if (bin && len && (CryptAcquireContextW(&hCryptProv, L"", L"", 1, -268435456)
-		|| CryptAcquireContextW(&hCryptProv, L"", L"", 1, 0))) {
+	HCRYPTPROV hCryptProv{ };
+	if (bin && len && (CryptAcquireContextW(&hCryptProv, L"", L"", 1U, -268435456)
+		|| CryptAcquireContextW(&hCryptProv, L"", L"", 1U, 0U))) {
 		HCRYPTKEY hKey{ };
-		HCRYPTHASH hHash;
-		if (CryptCreateHash(hCryptProv, 32771, hKey, 0, &hHash)) {
-			if (CryptHashData(hHash, bin, len, 0)) {
+		HCRYPTHASH hHash{ };
+		if (CryptCreateHash(hCryptProv, 32771, hKey, 0U, &hHash)) {
+			if (CryptHashData(hHash, bin, len, 0U)) {
 				mqbyte rgbHash[16]{ };
-				mqdword cbHash{ 16U };
-				if (CryptGetHashParam(hHash, 2, rgbHash, &cbHash, 0)) {
+				mqui32 cbHash{ 16U };
+				if (CryptGetHashParam(hHash, 2U, rgbHash, &cbHash, 0U)) {
 					for (mqui32 i{ }; i < cbHash; ++i) {
 						md5[i * 2] = MD5DIC[rgbHash[i] >> 4];
 						md5[i * 2 + 1] = MD5DIC[rgbHash[i] & 15];
@@ -108,7 +115,7 @@ META_EXPORT_API(void, GetMD5, mqcbytes bin, mqui32 len, mqstr md5) {
 			}
 			CryptDestroyHash(hHash);
 		}
-		CryptReleaseContext(hCryptProv, 0);
+		CryptReleaseContext(hCryptProv, 0U);
 	}
 }
 

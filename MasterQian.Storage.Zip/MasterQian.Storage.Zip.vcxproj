@@ -83,10 +83,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\include\MasterQian.freestanding.ixx" />
     <ClCompile Include="MasterQian.Storage.Zip.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\MasterQian.Storage.Zip.h" />
     <ClInclude Include="ioapi.h" />
     <ClInclude Include="unzip.h" />
     <ClInclude Include="zconf.h" />

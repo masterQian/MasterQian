@@ -2,9 +2,9 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="MasterQian.DB.Sqlite.cpp" />
+    <ClCompile Include="..\include\MasterQian.freestanding.ixx" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\MasterQian.DB.Sqlite.h" />
     <ClInclude Include="sqlite3.h" />
   </ItemGroup>
   <ItemGroup>

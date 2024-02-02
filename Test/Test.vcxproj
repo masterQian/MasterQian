@@ -43,6 +43,12 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -51,6 +57,8 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <AdditionalModuleDependencies>
+      </AdditionalModuleDependencies>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -69,6 +77,8 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalModuleDependencies>
+      </AdditionalModuleDependencies>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -79,10 +89,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\include\MasterQian.Bin.ixx" />
+    <ClCompile Include="..\include\MasterQian.Data.ixx" />
+    <ClCompile Include="..\include\MasterQian.DB.Sqlite.ixx" />
+    <ClCompile Include="..\include\MasterQian.freestanding.ixx" />
+    <ClCompile Include="..\include\MasterQian.Log.ixx" />
+    <ClCompile Include="..\include\MasterQian.Media.Color.ixx" />
+    <ClCompile Include="..\include\MasterQian.Media.GDI.ixx" />
+    <ClCompile Include="..\include\MasterQian.Parser.Config.ixx" />
+    <ClCompile Include="..\include\MasterQian.Parser.Ini.ixx" />
+    <ClCompile Include="..\include\MasterQian.Storage.Path.ixx" />
+    <ClCompile Include="..\include\MasterQian.Storage.PDF.ixx" />
+    <ClCompile Include="..\include\MasterQian.Storage.Zip.ixx" />
+    <ClCompile Include="..\include\MasterQian.System.ixx" />
+    <ClCompile Include="..\include\MasterQian.Time.ixx" />
+    <ClCompile Include="..\include\MasterQian.Tool.Benchmark.ixx" />
     <ClCompile Include="Test.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Test.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

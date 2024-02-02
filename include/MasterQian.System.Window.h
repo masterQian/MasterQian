@@ -14,9 +14,9 @@
 
 namespace MasterQian::System::Window {
 	namespace details {
-		META_IMPORT_API(void, ShowTaskBar, mqbool);
+		
 		META_MODULE_BEGIN
-			META_PROC_API(ShowTaskBar);
+			
 		META_MODULE_END
 	}
 #undef MasterQianModuleName
@@ -24,11 +24,4 @@ namespace MasterQian::System::Window {
 #undef MasterQianLibString
 #undef MasterQianModuleVersion
 
-	/// <summary>
-	/// 显示任务栏
-	/// </summary>
-	/// <param name="status">是否显示任务栏</param>
-	inline void ShowTaskBar(bool status = true) noexcept {
-		 details::MasterQian_System_Window_ShowTaskBar(status);
-	}
 }

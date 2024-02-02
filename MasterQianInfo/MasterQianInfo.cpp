@@ -11,6 +11,7 @@ int wmain(int argc, wchar_t** argv) {
             auto verFunc = (VerFuncType)GetProcAddress(handle, "MasterQianVersion");
             if (verFunc) {
                 wprintf(L"%llu", verFunc());
+                FreeLibrary(handle);
             }
             else {
                 wprintf(L"damaged dLL");

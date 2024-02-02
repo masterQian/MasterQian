@@ -1,11 +1,9 @@
 ﻿#include "../include/MasterQian.Meta.h"
-
 #include "sqlite3.h"
-#define _AMD64_
-#include <stringapiset.h>
-
-#define MasterQianModuleName(_) MasterQian_DB_Sqlite_
-META_EXPORT_API_VERSION(20231229ULL)
+import MasterQian.freestanding;
+using namespace MasterQian;
+#define MasterQianModuleName(name) MasterQian_DB_Sqlite_##name
+META_EXPORT_API_VERSION(20240131ULL)
 
 enum class Result : mqi32 {
 	OK, ERROR, INTERNAL, PERM, ABORT, BUSY, LOCKED, MOMEM, READONLY, INTERRUPT,
@@ -39,11 +37,9 @@ META_EXPORT_API(mqcstr, LastResultString, sqlite3* handle) {
 
 META_EXPORT_API(Result, Execute, sqlite3* handle, mqcstr sql) {
 	// Why doesn't sqlite3 provide the char16 version of sqlite3_exec?
-	auto len{ WideCharToMultiByte(CP_UTF8, 0, sql, -1,
-		nullptr, 0, nullptr, nullptr) };
-	mqstra buf = new mqchara[len + 1] { };
-	WideCharToMultiByte(CP_UTF8, 0, sql, -1,
-		buf, len, nullptr, nullptr);
+	auto len{ api::WideCharToMultiByte(65001U, 0, sql, -1, nullptr, 0, nullptr, nullptr) };
+	mqstra buf = new mqchara[len]{ };
+	api::WideCharToMultiByte(65001U, 0, sql, -1, buf, len, nullptr, nullptr);
 	auto result{ rs_cast(sqlite3_exec(handle, buf, nullptr, nullptr, nullptr)) };
 	delete[] buf;
 	return result;
