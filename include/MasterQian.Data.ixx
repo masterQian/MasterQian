@@ -1,5 +1,6 @@
 module;
 #include "MasterQian.Meta.h"
+#include <string>
 #define MasterQianModuleName(name) MasterQian_Data_##name
 #define MasterQianModuleNameString(name) "MasterQian_Data_"#name
 #ifdef _DEBUG
@@ -14,25 +15,12 @@ export module MasterQian.Data;
 export import MasterQian.Bin;
 
 namespace MasterQian::Data {
-	// 文本编码类型
-	export enum class CodePage : mqenum {
-		ANSI = 0U, UTF8 = 65001U
-	};
-
 	namespace details {
-		META_IMPORT_API(mqui32, ToStringImpl1, mqcmem, mqui32, CodePage);
-		META_IMPORT_API(void, ToStringImpl2, mqcmem, mqui32, mqstr, mqui32, CodePage);
-		META_IMPORT_API(mqui32, ToBinImpl1, mqcstr, mqui32, CodePage);
-		META_IMPORT_API(void, ToBinImpl2, mqcstr, mqui32, mqmem, mqui32, CodePage);
 		META_IMPORT_API(mqui32, GetCRC32, mqcbytes, mqui32);
 		META_IMPORT_API(void, GetMD5, mqcbytes, mqui32, mqstr);
 		META_IMPORT_API(void, Base64Encode, mqcbytes, mqui64, mqstr);
 		META_IMPORT_API(void, Base64Decode, mqcstr, mqui64, mqbytes);
 		META_MODULE_BEGIN
-			META_PROC_API(ToStringImpl1);
-			META_PROC_API(ToStringImpl2);
-			META_PROC_API(ToBinImpl1);
-			META_PROC_API(ToBinImpl2);
 			META_PROC_API(GetCRC32);
 			META_PROC_API(GetMD5);
 			META_PROC_API(Base64Encode);
@@ -42,38 +30,6 @@ namespace MasterQian::Data {
 }
 
 export namespace MasterQian::Data {
-	/// <summary>
-	/// 字节集转字符串
-	/// </summary>
-	/// <param name="bv">字节集</param>
-	/// <param name="cp">编码，默认为UTF8</param>
-	/// <returns>字符串</returns>
-	[[nodiscard]] inline std::wstring ToString(BinView bv, CodePage cp = CodePage::UTF8) noexcept {
-		std::wstring tmp;
-		auto len{ details::MasterQian_Data_ToStringImpl1(bv.data(), bv.size32(), cp) };
-		if (len) {
-			tmp.resize(len);
-			details::MasterQian_Data_ToStringImpl2(bv.data(), bv.size32(), tmp.data(), len, cp);
-		}
-		return tmp;
-	}
-
-	/// <summary>
-	/// 字符串转字节集
-	/// </summary>
-	/// <param name="sv">字符串</param>
-	/// <param name="cp">编码，默认为UTF8</param>
-	/// <returns>字节集</returns>
-	[[nodiscard]] inline Bin ToBin(std::wstring_view sv, CodePage cp = CodePage::UTF8) noexcept {
-		Bin tmp;
-		auto len{ details::MasterQian_Data_ToBinImpl1(sv.data(), static_cast<mqui32>(sv.size()), cp) };
-		if (len) {
-			tmp.resize(len);
-			details::MasterQian_Data_ToBinImpl2(sv.data(), static_cast<mqui32>(sv.size()), tmp.data(), len, cp);
-		}
-		return tmp;
-	}
-
 	/// <summary>
 	/// 取哈希值
 	/// </summary>
@@ -135,12 +91,4 @@ export namespace MasterQian::Data {
 		details::MasterQian_Data_Base64Decode(sv.data(), len, bin.data());
 		return bin;
 	}
-}
-
-export [[nodiscard]] inline MasterQian::Bin operator ""_ansi(mqcstr str, mqui64 size) noexcept {
-	return MasterQian::Data::ToBin(std::wstring_view{ str, size }, MasterQian::Data::CodePage::ANSI);
-}
-
-export [[nodiscard]] inline MasterQian::Bin operator ""_utf8(mqcstr str, mqui64 size) noexcept {
-	return MasterQian::Data::ToBin(std::wstring_view{ str, size }, MasterQian::Data::CodePage::UTF8);
 }

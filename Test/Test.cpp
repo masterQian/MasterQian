@@ -1,4 +1,7 @@
-﻿import MasterQian.Bin;
+﻿#include <string>
+#include <vector>
+#include <unordered_map>
+import MasterQian.Bin;
 import MasterQian.Data;
 import MasterQian.DB.Sqlite;
 import MasterQian.Log;
@@ -12,7 +15,7 @@ import MasterQian.Storage.Zip;
 import MasterQian.System;
 import MasterQian.Time;
 import MasterQian.Tool.Benchmark;
-
+import MasterQian.WinRT;
 using namespace MasterQian;
 
 #if 0
@@ -21,6 +24,6 @@ using namespace MasterQian;
 #endif
 int main() {
 	ConsoleLogger logger;
-	logger.i((17069016426267284_time).format());
+	logger.i(L"钱浩宇"_utf8);
 	return 0;
 }

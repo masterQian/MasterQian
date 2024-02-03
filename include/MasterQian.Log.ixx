@@ -1,18 +1,10 @@
 module;
 #include "MasterQian.Meta.h"
-#define MasterQianModuleName(name) MasterQian_Log_##name
-#define MasterQianModuleNameString(name) "MasterQian_Log_"#name
-#ifdef _DEBUG
-#define MasterQianLibString "MasterQian.Log.Debug.dll"
-#else
-#define MasterQianLibString "MasterQian.Log.dll"
-#endif
+#include <string>
 #define MasterQianModuleVersion 20240131ULL
-#pragma message("！！！！！！！！！！ Please copy [" MasterQianLibString "] into your program folder ！！！！！！！！！！")
 
 export module MasterQian.Log;
 export import MasterQian.freestanding;
-export import <string>;
 
 export namespace MasterQian {
 	// 晩崗窃侏
@@ -30,16 +22,25 @@ export namespace MasterQian {
 	};
 }
 
-namespace MasterQian::details {
-	META_IMPORT_API(mqhandle, CreateLogger, LogType, mqcmem);
-	META_IMPORT_API(void, CloseLogger, LogType, mqhandle);
-	META_IMPORT_API(void, LoggerLog, LogType, LogTag, mqhandle, mqcstr, mqui32);
-	META_MODULE_BEGIN
-		META_PROC_API(CreateLogger);
-	META_PROC_API(CloseLogger);
-	META_PROC_API(LoggerLog);
-	META_MODULE_END
+namespace MasterQian::api {
+	META_WINAPI(mqhandle, GetStdHandle, mqui32);
+	META_WINAPI(mqbool, CloseHandle, mqhandle);
+	META_WINAPI(mqhandle, CreateFileW, mqcstr, mqui32, mqui32, mqhandle, mqui32, mqui32, mqhandle);
+	META_WINAPI(mqbool, WriteFile, mqhandle, mqcmem, mqui32, mqui32*, mqhandle);
+	META_WINAPI(mqbool, WriteConsoleW, mqhandle, mqcmem, mqui32, mqui32*, mqmem);
+	META_WINAPI(mqbool, SetConsoleTextAttribute, mqhandle, mqui16);
+	META_WINAPI(void, OutputDebugStringW, mqcstr);
 
+#pragma comment(linker,"/alternatename:__imp_?OutputDebugStringW@api@MasterQian@@YAXPEB_W@Z::<!MasterQian.Log>=__imp_OutputDebugStringW")
+#pragma comment(linker,"/alternatename:__imp_?WriteFile@api@MasterQian@@YAHPEAXPEBXIPEAI0@Z::<!MasterQian.Log>=__imp_WriteFile")
+#pragma comment(linker,"/alternatename:__imp_?WriteConsoleW@api@MasterQian@@YAHPEAXPEBXIPEAI0@Z::<!MasterQian.Log>=__imp_WriteConsoleW")
+#pragma comment(linker,"/alternatename:__imp_?SetConsoleTextAttribute@api@MasterQian@@YAHPEAXG@Z::<!MasterQian.Log>=__imp_SetConsoleTextAttribute")
+#pragma comment(linker,"/alternatename:__imp_?CloseHandle@api@MasterQian@@YAHPEAX@Z::<!MasterQian.Log>=__imp_CloseHandle")
+#pragma comment(linker,"/alternatename:__imp_?CreateFileW@api@MasterQian@@YAPEAXPEB_WIIPEAXII1@Z::<!MasterQian.Log>=__imp_CreateFileW")
+#pragma comment(linker,"/alternatename:__imp_?GetStdHandle@api@MasterQian@@YAPEAXI@Z::<!MasterQian.Log>=__imp_GetStdHandle")
+}
+
+namespace MasterQian::details {
 	template<typename T>
 	concept can_to_wstring = requires (freestanding::remove_cvref<T> t) {
 		{ std::to_wstring(t) } -> freestanding::same<std::wstring>;
@@ -97,6 +98,72 @@ namespace MasterQian::details {
 			t.Log(buf);
 		}
 	}
+
+	inline mqhandle CreateLogger(LogType type, mqcmem arg) noexcept {
+		switch (type) {
+		case LogType::STD_CONSOLE: {
+			return api::GetStdHandle(static_cast<mqui32>(-11));
+		}
+		case LogType::DEBUG_CONSOLE: {
+			return reinterpret_cast<mqhandle>(5201314U);
+		}
+		case LogType::FILE: {
+			if (arg) {
+				auto hFile{ api::CreateFileW(static_cast<mqcstr>(arg), 0x40000000U, 0,
+					nullptr, 2U, 0x00000080U, nullptr) };
+				return hFile != reinterpret_cast<mqhandle>(-1) ? hFile : nullptr;
+			}
+			break;
+		}
+		}
+		return nullptr;
+	}
+
+	inline void CloseLogger(LogType type, mqhandle handle) noexcept {
+		if (type == LogType::FILE) {
+			api::CloseHandle(handle);
+		}
+	}
+
+	inline void LoggerLog(LogType type, LogTag tag, mqhandle handle, mqcstr msg, mqui32 size) noexcept {
+		switch (type) {
+		case LogType::STD_CONSOLE: {
+			switch (tag) {
+			case LogTag::INFO: {
+				api::SetConsoleTextAttribute(handle, 0x0002U);
+				break;
+			}
+			case LogTag::WARNING: {
+				api::SetConsoleTextAttribute(handle, 0x0001U);
+				break;
+			}
+			case LogTag::ERR: {
+				api::SetConsoleTextAttribute(handle, 0x0004U);
+				break;
+			}
+			}
+			api::WriteConsoleW(handle, msg, size, nullptr, nullptr);
+			api::SetConsoleTextAttribute(handle, 0x0004U | 0x0002U | 0x0001U);
+			break;
+		}
+		case LogType::FILE: {
+			auto len{ api::WideCharToMultiByte(65001U, 0, msg, size, nullptr, 0, nullptr, nullptr) };
+			if (len > 0) {
+				static std::string buffer;
+				if (buffer.capacity() < len) {
+					buffer.reserve(len);
+				}
+				api::WideCharToMultiByte(65001U, 0, msg, size, buffer.data(), len, nullptr, nullptr);
+				api::WriteFile(handle, buffer.data(), len, nullptr, nullptr);
+			}
+			break;
+		}
+		case LogType::DEBUG_CONSOLE: {
+			api::OutputDebugStringW(msg);
+			break;
+		}
+		}
+	}
 }
 
 export namespace MasterQian {
@@ -112,7 +179,7 @@ export namespace MasterQian {
 		/// </summary>
 		/// <param name="arg">歌方</param>
 		Logger(mqcmem arg = nullptr) noexcept {
-			handle = details::MasterQian_Log_CreateLogger(type, arg);
+			handle = details::CreateLogger(type, arg);
 		}
 
 		Logger(Logger const&) = delete;
@@ -128,7 +195,7 @@ export namespace MasterQian {
 		/// <param name="arg">歌方</param>
 		void reset(mqcmem arg = nullptr) noexcept {
 			close();
-			handle = details::MasterQian_Log_CreateLogger(type, arg);
+			handle = details::CreateLogger(type, arg);
 		}
 
 		/// <summary>
@@ -136,7 +203,7 @@ export namespace MasterQian {
 		/// </summary>
 		void close() noexcept {
 			if (handle) {
-				details::MasterQian_Log_CloseLogger(type, handle);
+				details::CloseLogger(type, handle);
 				handle = nullptr;
 			}
 		}
@@ -154,7 +221,7 @@ export namespace MasterQian {
 				if (newLine) {
 					buf += (type == LogType::FILE ? L"\r\n" : L"\n");
 				}
-				details::MasterQian_Log_LoggerLog(type, tag, handle, buf.data(), static_cast<mqui32>(buf.size()));
+				details::LoggerLog(type, tag, handle, buf.data(), static_cast<mqui32>(buf.size()));
 			}
 		}
 

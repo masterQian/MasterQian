@@ -1,5 +1,6 @@
 module;
 #include "MasterQian.Meta.h"
+#include <string>
 #define MasterQianModuleName(name) MasterQian_Storage_PDF_##name
 #define MasterQianModuleNameString(name) "MasterQian_Storage_PDF_"#name
 #ifdef _DEBUG

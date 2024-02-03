@@ -23,24 +23,6 @@ META_WINAPI(mqbool, CryptReleaseContext, HCRYPTPROV, mqui32);
 #pragma comment(linker,"/alternatename:__imp_?CryptDestroyHash@@YAH_K@Z=__imp_CryptDestroyHash")
 #pragma comment(linker,"/alternatename:__imp_?CryptReleaseContext@@YAH_KI@Z=__imp_CryptReleaseContext")
 
-META_EXPORT_API(mqui32, ToStringImpl1, mqcmem data, mqui32 size, mqui32 cp) {
-    auto len{ api::MultiByteToWideChar(cp, 0, static_cast<mqcstra>(data), static_cast<mqi32>(size), nullptr, 0) };
-    return len > 0 ? static_cast<mqui32>(len) : 0U;
-}
-
-META_EXPORT_API(void, ToStringImpl2, mqcmem data, mqui32 size, mqstr str, mqui32 len, mqui32 cp) {
-	api::MultiByteToWideChar(cp, 0, static_cast<mqcstra>(data), static_cast<mqi32>(size), str, len);
-}
-
-META_EXPORT_API(mqui32, ToBinImpl1, mqcstr str, mqui32 size, mqui32 cp) {
-    auto len{ api::WideCharToMultiByte(cp, 0, str, size, nullptr, 0, nullptr, nullptr) };
-    return len > 0 ? static_cast<mqui32>(len) : 0U;
-}
-
-META_EXPORT_API(void, ToBinImpl2, mqcstr str, mqui32 size, mqmem data, mqui32 len, mqui32 cp) {
-	api::WideCharToMultiByte(cp, 0, str, size, static_cast<mqstra>(data), len, nullptr, nullptr);
-}
-
 META_EXPORT_API(mqui32, GetCRC32, mqcbytes bin, mqui32 len) {
 	constexpr mqui32 crcTable[] = {
 		0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f,

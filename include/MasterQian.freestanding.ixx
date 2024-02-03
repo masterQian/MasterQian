@@ -78,17 +78,11 @@ export struct mqsystemtime {
 export struct mqpoint {
 	mqui32 x;
 	mqui32 y;
-	[[nodiscard]] bool operator == (mqpoint const& other) const noexcept {
-		return x == other.x && y == other.y;
-	}
 };
 // 尺寸
 export struct mqsize {
 	mqui32 width;
 	mqui32 height;
-	[[nodiscard]] bool operator == (mqsize const& other) const noexcept {
-		return width == other.width && height == other.height;
-	}
 };
 // 矩形
 export struct mqrect {
@@ -96,9 +90,6 @@ export struct mqrect {
 	mqui32 top;
 	mqui32 width;
 	mqui32 height;
-	[[nodiscard]] bool operator == (mqrect const& other) const noexcept {
-		return left == other.left && top == other.top && width == other.width && height == other.height;
-	}
 };
 // 范围
 export struct mqrange {
@@ -106,9 +97,6 @@ export struct mqrange {
 	mqui32 top;
 	mqui32 right;
 	mqui32 bottom;
-	[[nodiscard]] bool operator == (mqrange const& other) const noexcept {
-		return left == other.left && top == other.top && right == other.right && bottom == other.bottom;
-	}
 };
 
 
@@ -298,28 +286,28 @@ export namespace MasterQian::freestanding {
 	}
 
 #if defined(__has_builtin)
-#define __has_builtin_memcpy __has_builtin(__builtin_memcpy)
-#define __has_builtin_memcmp __has_builtin(__builtin_memcmp)
-#define __has_builtin_memset __has_builtin(__builtin_memset)
-#define __has_builtin_bit_cast __has_builtin(__builtin_bit_cast)
+#define ___memcpy___ __has_builtin(__builtin_memcpy)
+#define ___memcmp___ __has_builtin(__builtin_memcmp)
+#define ___memset___ __has_builtin(__builtin_memset)
+#define ___bit_cast___ __has_builtin(__builtin_bit_cast)
 #else
-#define __has_builtin_memcpy 0
-#define __has_builtin_memcmp 0
-#define __has_builtin_memset 0
-#define __has_builtin_bit_cast 0
+#define ___memcpy___ 0
+#define ___memcmp___ 0
+#define ___memset___ 0
+#define ___bit_cast___ 0
 #endif
 
 	// compare
-#if !__has_builtin_memcmp
+#if !___memcmp___
 	extern "C" mqi32 __cdecl memcmp(mqcmem des, mqcmem src, mqui64 size);
 #endif
 
 	inline
-#if __has_builtin_memcmp
+#if ___memcmp___
 		constexpr
 #endif
 		mqi32 compare(mqcmem des, mqcmem src, mqui64 size) noexcept {
-#if __has_builtin_memcmp
+#if ___memcmp___
 		return __builtin_memcmp(des, src, size);
 #else
 		return memcmp(des, src, size);
@@ -327,16 +315,16 @@ export namespace MasterQian::freestanding {
 	}
 
 	// copy
-#if !__has_builtin_memcpy
+#if !___memcpy___
 	extern "C" mqmem __cdecl memcpy(mqmem des, mqcmem src, mqui64 size);
 #endif
 
 	inline
-#if __has_builtin_memcpy
+#if ___memcpy___
 		constexpr
 #endif
 		mqmem copy(mqmem des, mqcmem src, mqui64 size) noexcept {
-#if __has_builtin_memcpy
+#if ___memcpy___
 		return __builtin_memcpy(des, src, size);
 #else
 		return memcpy(des, src, size);
@@ -345,7 +333,7 @@ export namespace MasterQian::freestanding {
 
 	template<copyable_memory T>
 	inline
-#if __has_builtin_memcpy
+#if ___memcpy___
 		constexpr
 #endif
 		T* copy_n(T* des, mqcmem src, mqui64 n) noexcept {
@@ -353,16 +341,16 @@ export namespace MasterQian::freestanding {
 	}
 
 	// initialize
-#if !__has_builtin_memset
+#if !___memset___
 	extern "C" mqmem __cdecl memset(mqmem des, mqi32 val, mqui64 size);
 #endif
 
 	inline
-#if __has_builtin_memset
+#if ___memset___
 		constexpr
 #endif
 		mqmem initialize(mqmem des, mqi32 val, mqui64 size) noexcept {
-#if __has_builtin_memset
+#if ___memset___
 		return __builtin__memset(des, val, size);
 #else
 		return memset(des, val, size);
@@ -371,7 +359,7 @@ export namespace MasterQian::freestanding {
 
 	template<typename T>
 	inline
-#if __has_builtin_memset
+#if ___memset___
 		constexpr
 #endif
 		T* initialize_n(T* des, mqi32 val, mqui64 n) noexcept {
@@ -380,13 +368,13 @@ export namespace MasterQian::freestanding {
 
 	// bit_cast
 	template<typename To, typename From>
-		requires (sizeof(To) == sizeof(From) && copyable_memory<To> && trivial<From>)
+	requires (sizeof(To) == sizeof(From) && copyable_memory<To> && trivial<From>)
 	[[nodiscard]] inline
-#if __has_builtin_memcpy || __has_builtin_bit_cast
+#if ___memcpy___ || ___bit_cast___
 		constexpr
 #endif
 		To bit_cast(From const& src) noexcept {
-#if __has_builtin_bit_cast
+#if ___bit_cast___
 		return __builtin_bit_cast(To, src);
 #else
 		To des;
@@ -517,20 +505,20 @@ export namespace MasterQian::freestanding {
 
 /*    freestanding type transfer    */
 
-// _guid
+// guid
 namespace MasterQian::freestanding {
 	template<integral T>
 	inline constexpr bool guid_parse(T& data, mqcstr str, mqui64 start) noexcept {
 		T base{ 1U << (((sizeof(T) << 1U) - 1U) * 4U) };
 		for (mqui64 i{ start }, end{ start + (sizeof(T) << 1ULL) }; i < end; ++i) {
 			if (str[i] >= L'0' && str[i] <= L'9') {
-				data += (str[i] - L'0') * base;
+				data += static_cast<T>((str[i] - L'0') * base);
 			}
 			else if (str[i] >= L'a' && str[i] <= L'f') {
-				data += (str[i] - L'a' + 10U) * base;
+				data += static_cast<T>((str[i] - L'a' + 10U) * base);
 			}
 			else if (str[i] >= L'A' && str[i] <= L'F') {
-				data += (str[i] - L'A' + 10U) * base;
+				data += static_cast<T>((str[i] - L'A' + 10U) * base);
 			}
 			else {
 				return false;
@@ -582,6 +570,266 @@ export [[nodiscard]] inline constexpr mqguid operator ""_guid(mqcstr str, mqui64
 	return guid;
 }
 
+// mqpoint
+export [[nodiscard]] bool operator == (mqpoint const& point1, mqpoint const& point2) noexcept {
+	return point1.x == point2.x && point1.y == point2.y;
+}
+
+export template<MasterQian::freestanding::numeric T>
+mqpoint& operator += (mqpoint& point, T value) noexcept {
+	point.x = static_cast<mqui32>(point.x + value);
+	point.y = static_cast<mqui32>(point.y + value);
+	return point;
+}
+
+export template<MasterQian::freestanding::numeric T>
+[[nodiscard]] mqpoint operator + (mqpoint const& point, T value) noexcept {
+	mqpoint tmp{ point };
+	tmp += value;
+	return tmp;
+}
+
+export template<MasterQian::freestanding::numeric T>
+mqpoint& operator -= (mqpoint& point, T value) noexcept {
+	point.x = static_cast<mqui32>(point.x - value);
+	point.y = static_cast<mqui32>(point.y - value);
+	return point;
+}
+
+export template<MasterQian::freestanding::numeric T>
+[[nodiscard]] mqpoint operator - (mqpoint const& point, T value) noexcept {
+	mqpoint tmp{ point };
+	tmp -= value;
+	return tmp;
+}
+
+export template<MasterQian::freestanding::numeric T>
+mqpoint& operator *= (mqpoint& point, T value) noexcept {
+	point.x = static_cast<mqui32>(point.x * value);
+	point.y = static_cast<mqui32>(point.y * value);
+	return point;
+}
+
+export template<MasterQian::freestanding::numeric T>
+[[nodiscard]] mqpoint operator * (mqpoint const& point, T value) noexcept {
+	mqpoint tmp{ point };
+	tmp *= value;
+	return tmp;
+}
+
+export template<MasterQian::freestanding::numeric T>
+mqpoint& operator /= (mqpoint& point, T value) noexcept {
+	point.x = static_cast<mqui32>(point.x / value);
+	point.y = static_cast<mqui32>(point.y / value);
+	return point;
+}
+
+export template<MasterQian::freestanding::numeric T>
+[[nodiscard]] mqpoint operator / (mqpoint const& point, T value) noexcept {
+	mqpoint tmp{ point };
+	tmp /= value;
+	return tmp;
+}
+
+// mqsize
+export [[nodiscard]] bool operator == (mqsize const& size1, mqsize const& size2) noexcept {
+	return size1.width == size2.width && size1.height == size2.height;
+}
+
+export template<MasterQian::freestanding::numeric T>
+mqsize& operator += (mqsize& size, T value) noexcept {
+	size.width = static_cast<mqui32>(size.width + value);
+	size.height = static_cast<mqui32>(size.height + value);
+	return size;
+}
+
+export template<MasterQian::freestanding::numeric T>
+[[nodiscard]] mqsize operator + (mqsize const& size, T value) noexcept {
+	mqsize tmp{ size };
+	tmp += value;
+	return tmp;
+}
+
+export template<MasterQian::freestanding::numeric T>
+mqsize& operator -= (mqsize& size, T value) noexcept {
+	size.width = static_cast<mqui32>(size.width - value);
+	size.height = static_cast<mqui32>(size.height - value);
+	return size;
+}
+
+export template<MasterQian::freestanding::numeric T>
+[[nodiscard]] mqsize operator - (mqsize const& size, T value) noexcept {
+	mqsize tmp{ size };
+	tmp -= value;
+	return tmp;
+}
+
+export template<MasterQian::freestanding::numeric T>
+mqsize& operator *= (mqsize& size, T value) noexcept {
+	size.width = static_cast<mqui32>(size.width * value);
+	size.height = static_cast<mqui32>(size.height * value);
+	return size;
+}
+
+export template<MasterQian::freestanding::numeric T>
+[[nodiscard]] mqsize operator * (mqsize const& size, T value) noexcept {
+	mqsize tmp{ size };
+	tmp *= value;
+	return tmp;
+}
+
+export template<MasterQian::freestanding::numeric T>
+mqsize& operator /= (mqsize& size, T value) noexcept {
+	size.width = static_cast<mqui32>(size.width / value);
+	size.height = static_cast<mqui32>(size.height / value);
+	return size;
+}
+
+export template<MasterQian::freestanding::numeric T>
+[[nodiscard]] mqsize operator / (mqsize const& size, T value) noexcept {
+	mqsize tmp{ size };
+	tmp /= value;
+	return tmp;
+}
+
+// mqrect
+export [[nodiscard]] bool operator == (mqrect const& rect1, mqrect const& rect2) noexcept {
+	return rect1.left == rect2.left && rect1.top == rect2.top && rect1.width == rect2.width && rect1.height == rect2.height;
+}
+
+export template<MasterQian::freestanding::numeric T>
+mqrect& operator += (mqrect& rect, T value) noexcept {
+	rect.left = static_cast<mqui32>(rect.left + value);
+	rect.top = static_cast<mqui32>(rect.top + value);
+	rect.width = static_cast<mqui32>(rect.width + value);
+	rect.height = static_cast<mqui32>(rect.height + value);
+	return rect;
+}
+
+export template<MasterQian::freestanding::numeric T>
+[[nodiscard]] mqrect operator + (mqrect const& rect, T value) noexcept {
+	mqrect tmp{ rect };
+	tmp += value;
+	return tmp;
+}
+
+export template<MasterQian::freestanding::numeric T>
+mqrect& operator -= (mqrect& rect, T value) noexcept {
+	rect.left = static_cast<mqui32>(rect.left - value);
+	rect.top = static_cast<mqui32>(rect.top - value);
+	rect.width = static_cast<mqui32>(rect.width - value);
+	rect.height = static_cast<mqui32>(rect.height - value);
+	return rect;
+}
+
+export template<MasterQian::freestanding::numeric T>
+[[nodiscard]] mqrect operator - (mqrect const& rect, T value) noexcept {
+	mqrect tmp{ rect };
+	tmp -= value;
+	return tmp;
+}
+
+export template<MasterQian::freestanding::numeric T>
+mqrect& operator *= (mqrect& rect, T value) noexcept {
+	rect.left = static_cast<mqui32>(rect.left * value);
+	rect.top = static_cast<mqui32>(rect.top * value);
+	rect.width = static_cast<mqui32>(rect.width * value);
+	rect.height = static_cast<mqui32>(rect.height * value);
+	return rect;
+}
+
+export template<MasterQian::freestanding::numeric T>
+[[nodiscard]] mqrect operator * (mqrect const& rect, T value) noexcept {
+	mqrect tmp{ rect };
+	tmp *= value;
+	return tmp;
+}
+
+export template<MasterQian::freestanding::numeric T>
+mqrect& operator /= (mqrect& rect, T value) noexcept {
+	rect.left = static_cast<mqui32>(rect.left / value);
+	rect.top = static_cast<mqui32>(rect.top / value);
+	rect.width = static_cast<mqui32>(rect.width / value);
+	rect.height = static_cast<mqui32>(rect.height / value);
+	return rect;
+}
+
+export template<MasterQian::freestanding::numeric T>
+[[nodiscard]] mqrect operator / (mqrect const& rect, T value) noexcept {
+	mqrect tmp{ rect };
+	tmp /= value;
+	return tmp;
+}
+
+// mqrange
+export [[nodiscard]] bool operator == (mqrange const& range1, mqrange const& range2) noexcept {
+	return range1.left == range2.left && range1.top == range2.top && range1.right == range2.right && range1.bottom == range2.bottom;
+}
+
+export template<MasterQian::freestanding::numeric T>
+mqrange& operator += (mqrange& range, T value) noexcept {
+	range.left = static_cast<mqui32>(range.left + value);
+	range.top = static_cast<mqui32>(range.top + value);
+	range.right = static_cast<mqui32>(range.right + value);
+	range.bottom = static_cast<mqui32>(range.bottom + value);
+	return range;
+}
+
+export template<MasterQian::freestanding::numeric T>
+[[nodiscard]] mqrange operator + (mqrange const& range, T value) noexcept {
+	mqrange tmp{ range };
+	tmp += value;
+	return tmp;
+}
+
+export template<MasterQian::freestanding::numeric T>
+mqrange& operator -= (mqrange& range, T value) noexcept {
+	range.left = static_cast<mqui32>(range.left - value);
+	range.top = static_cast<mqui32>(range.top - value);
+	range.right = static_cast<mqui32>(range.right - value);
+	range.bottom = static_cast<mqui32>(range.bottom - value);
+	return range;
+}
+
+export template<MasterQian::freestanding::numeric T>
+[[nodiscard]] mqrange operator - (mqrange const& range, T value) noexcept {
+	mqrange tmp{ range };
+	tmp -= value;
+	return tmp;
+}
+
+export template<MasterQian::freestanding::numeric T>
+mqrange& operator *= (mqrange& range, T value) noexcept {
+	range.left = static_cast<mqui32>(range.left * value);
+	range.top = static_cast<mqui32>(range.top * value);
+	range.right = static_cast<mqui32>(range.right * value);
+	range.bottom = static_cast<mqui32>(range.bottom * value);
+	return range;
+}
+
+export template<MasterQian::freestanding::numeric T>
+[[nodiscard]] mqrange operator * (mqrange const& range, T value) noexcept {
+	mqrange tmp{ range };
+	tmp *= value;
+	return tmp;
+}
+
+export template<MasterQian::freestanding::numeric T>
+mqrange& operator /= (mqrange& range, T value) noexcept {
+	range.left = static_cast<mqui32>(range.left / value);
+	range.top = static_cast<mqui32>(range.top / value);
+	range.right = static_cast<mqui32>(range.right / value);
+	range.bottom = static_cast<mqui32>(range.bottom / value);
+	return range;
+}
+
+export template<MasterQian::freestanding::numeric T>
+[[nodiscard]] mqrange operator / (mqrange const& range, T value) noexcept {
+	mqrange tmp{ range };
+	tmp /= value;
+	return tmp;
+}
+
 /*    freestanding struct    */
 
 namespace MasterQian::freestanding {
@@ -606,6 +854,7 @@ export namespace MasterQian::api {
 export namespace MasterQian::api {
 	META_WINAPI(void*, LoadLibraryW, mqcstr);
 	META_WINAPI(mqproc, GetProcAddress, mqhandle, mqcstra);
+	META_WINAPI(mqbool, FreeLibrary, mqhandle);
 	META_WINAPI(mqi32, MessageBoxW, mqhandle, mqcstr, mqcstr, mqui32);
 	META_WINAPI(__declspec(noreturn) void, ExitProcess, mqui32);
 	META_WINAPI(mqstra, lstrcpyA, mqstra, mqcstra);
@@ -628,6 +877,7 @@ export namespace MasterQian::api {
 // 导出名重链接
 #pragma comment(linker,"/alternatename:__imp_?LoadLibraryW@api@MasterQian@@YAPEAXPEB_W@Z::<!MasterQian.freestanding>=__imp_LoadLibraryW")
 #pragma comment(linker,"/alternatename:__imp_?GetProcAddress@api@MasterQian@@YAP6A_JX_EPEAXPEBD@Z::<!MasterQian.freestanding>=__imp_GetProcAddress")
+#pragma comment(linker,"/alternatename:__imp_?FreeLibrary@api@MasterQian@@YAHPEAX@Z::<!MasterQian.freestanding>=__imp_FreeLibrary")
 #pragma comment(linker,"/alternatename:__imp_?MessageBoxW@api@MasterQian@@YAHPEAXPEB_W1I@Z::<!MasterQian.freestanding>=__imp_MessageBoxW")
 #pragma comment(linker,"/alternatename:__imp_?ExitProcess@api@MasterQian@@YAXI@Z::<!MasterQian.freestanding>=__imp_ExitProcess")
 #pragma comment(linker,"/alternatename:__imp_?lstrcpyA@api@MasterQian@@YAPEADPEADPEBD@Z::<!MasterQian.freestanding>=__imp_lstrcpyA")

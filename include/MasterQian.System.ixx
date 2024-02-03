@@ -1,5 +1,7 @@
 module;
 #include "MasterQian.Meta.h"
+#include <string>
+#include <vector>
 #define MasterQianModuleName(name) MasterQian_System_##name
 #define MasterQianModuleNameString(name) "MasterQian_System_"#name
 #ifdef _DEBUG

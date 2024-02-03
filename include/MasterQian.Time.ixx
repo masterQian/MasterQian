@@ -1,10 +1,10 @@
 module;
 #include "MasterQian.Meta.h"
+#include <string>
 #define MasterQianModuleVersion 20240131ULL
 
 export module MasterQian.Time;
 export import MasterQian.freestanding;
-export import <string>;
 
 namespace MasterQian {
 	namespace details {
@@ -105,8 +105,9 @@ namespace MasterQian {
 		/// </summary>
 		/// <param name="v">时间戳</param>
 		/// <param name="type">时间单位，默认为微秒，即17位时间戳</param>
-		constexpr Timestamp(mqui64 v, Type type = Type::microsecond) noexcept : value{ v } {
+		constexpr Timestamp(mqui64 v, Type type = Type::microsecond, bool isFileTime = false) noexcept : value{ v } {
 			value *= details::BASE10POW[static_cast<mqui64>(Type::microsecond) - static_cast<mqui64>(type)];
+			if (isFileTime) value -= details::UnixDST;
 		}
 
 		/// <summary>

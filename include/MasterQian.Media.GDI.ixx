@@ -1,5 +1,7 @@
 module;
 #include "MasterQian.Meta.h"
+#include <string>
+#include <vector>
 #define MasterQianModuleName(name) MasterQian_Media_GDI_##name
 #define MasterQianModuleNameString(name) "MasterQian_Media_GDI_"#name
 #ifdef _DEBUG

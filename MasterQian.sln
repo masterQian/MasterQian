@@ -20,7 +20,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MasterQian", "MasterQian", "{E8A9EEA9-4BA5-40CF-93DC-EFBBC9E3A092}"
 	ProjectSection(SolutionItems) = preProject
 		include\MasterQian.Meta.h = include\MasterQian.Meta.h
-		include\MasterQian.WinRT.h = include\MasterQian.WinRT.h
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MasterQian.Media.GDI", "MasterQian.Media.GDI\MasterQian.Media.GDI.vcxproj", "{D445CFCC-FC5B-4F56-B315-BDA3F6187D8F}"
@@ -36,8 +35,6 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MasterQian.Data", "MasterQian.Data\MasterQian.Data.vcxproj", "{1A657863-1F1C-4E0D-977B-2F6D3FF7B415}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MasterQian.Storage.PDF", "MasterQian.Storage.PDF\MasterQian.Storage.PDF.vcxproj", "{55F47A2F-5E32-4AB3-8116-BB9EAAB1C9D5}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MasterQian.Log", "MasterQian.Log\MasterQian.Log.vcxproj", "{F69BDCDB-EF16-496C-AAEE-4187723EC68C}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MasterQian.System", "MasterQian.System\MasterQian.System.vcxproj", "{8B65323E-1D0B-4148-884B-F04C2FEAA123}"
 EndProject
@@ -121,14 +118,6 @@ Global
 		{55F47A2F-5E32-4AB3-8116-BB9EAAB1C9D5}.Release|x64.Build.0 = Release|x64
 		{55F47A2F-5E32-4AB3-8116-BB9EAAB1C9D5}.Release|x86.ActiveCfg = Release|x64
 		{55F47A2F-5E32-4AB3-8116-BB9EAAB1C9D5}.Release|x86.Build.0 = Release|x64
-		{F69BDCDB-EF16-496C-AAEE-4187723EC68C}.Debug|x64.ActiveCfg = Debug|x64
-		{F69BDCDB-EF16-496C-AAEE-4187723EC68C}.Debug|x64.Build.0 = Debug|x64
-		{F69BDCDB-EF16-496C-AAEE-4187723EC68C}.Debug|x86.ActiveCfg = Debug|x64
-		{F69BDCDB-EF16-496C-AAEE-4187723EC68C}.Debug|x86.Build.0 = Debug|x64
-		{F69BDCDB-EF16-496C-AAEE-4187723EC68C}.Release|x64.ActiveCfg = Release|x64
-		{F69BDCDB-EF16-496C-AAEE-4187723EC68C}.Release|x64.Build.0 = Release|x64
-		{F69BDCDB-EF16-496C-AAEE-4187723EC68C}.Release|x86.ActiveCfg = Release|x64
-		{F69BDCDB-EF16-496C-AAEE-4187723EC68C}.Release|x86.Build.0 = Release|x64
 		{8B65323E-1D0B-4148-884B-F04C2FEAA123}.Debug|x64.ActiveCfg = Debug|x64
 		{8B65323E-1D0B-4148-884B-F04C2FEAA123}.Debug|x64.Build.0 = Debug|x64
 		{8B65323E-1D0B-4148-884B-F04C2FEAA123}.Debug|x86.ActiveCfg = Debug|x64
@@ -149,7 +138,6 @@ Global
 		{3D4C4F94-0393-4CD5-8E77-158E06ED3587} = {6E9A4D1E-A9D2-4906-9385-EF18B9020727}
 		{1A657863-1F1C-4E0D-977B-2F6D3FF7B415} = {E8A9EEA9-4BA5-40CF-93DC-EFBBC9E3A092}
 		{55F47A2F-5E32-4AB3-8116-BB9EAAB1C9D5} = {9F92B73E-66EE-4BED-9571-75174FFB4C58}
-		{F69BDCDB-EF16-496C-AAEE-4187723EC68C} = {E8A9EEA9-4BA5-40CF-93DC-EFBBC9E3A092}
 		{8B65323E-1D0B-4148-884B-F04C2FEAA123} = {C23BA001-AC28-4A3D-A831-4ABCD5F30AA5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

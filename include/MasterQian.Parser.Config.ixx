@@ -1,10 +1,11 @@
 module;
 #include "MasterQian.Meta.h"
+#include <string>
+#include <unordered_map>
 #define MasterQianModuleVersion 20240131ULL
 
 export module MasterQian.Parser.Config;
 export import MasterQian.Bin;
-export import <unordered_map>;
 
 namespace MasterQian::Parser {
 	namespace details {

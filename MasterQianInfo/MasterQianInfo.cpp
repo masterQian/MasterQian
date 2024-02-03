@@ -1,28 +1,28 @@
-﻿#include <cstdio>
+﻿import MasterQian.Log;
+using namespace MasterQian;
 
-#include <Windows.h>
-
-int wmain(int argc, wchar_t** argv) {
+mqi32 wmain(mqi32 argc, mqchar** argv) {
+    ConsoleLogger logger;
     if (argc == 2ULL) {
         auto dll_path{ argv[1ULL] };
-        auto handle{ LoadLibraryW(dll_path) };
+        auto handle{ api::LoadLibraryW(dll_path) };
         if (handle) {
-            using VerFuncType = ULONGLONG(__stdcall*)();
-            auto verFunc = (VerFuncType)GetProcAddress(handle, "MasterQianVersion");
+            using VerFuncType = mqui64(__stdcall*)();
+            auto verFunc = reinterpret_cast<VerFuncType>(api::GetProcAddress(handle, "MasterQianVersion"));
             if (verFunc) {
-                wprintf(L"%llu", verFunc());
-                FreeLibrary(handle);
+                logger.i(verFunc());
+                api::FreeLibrary(handle);
             }
             else {
-                wprintf(L"damaged dLL");
+                logger.e(L"damaged dLL");
             }
         }
         else {
-            wprintf(L"missing dll");
+            logger.e(L"missing dll");
         }
     }
     else {
-        wprintf(L"missing dll path");
+        logger.e(L"missing dll path");
     }
     return 0;
 }

@@ -1,5 +1,7 @@
 module;
 #include "MasterQian.Meta.h"
+#include <string>
+#include <vector>
 #define MasterQianModuleName(name) MasterQian_Tool_Benchmark_##name
 #define MasterQianModuleNameString(name) "MasterQian_Tool_Benchmark_"#name
 #ifdef _DEBUG
@@ -12,8 +14,6 @@ module;
 
 export module MasterQian.Tool.Benchmark;
 export import MasterQian.freestanding;
-export import <string>;
-export import <vector>;
 
 namespace MasterQian::Tool {
 	namespace details {

@@ -1,11 +1,11 @@
 module;
 #include "MasterQian.Meta.h"
+#include <string>
+#include <vector>
 #define MasterQianModuleVersion 20240131ULL
 
 export module MasterQian.Bin;
 export import MasterQian.freestanding;
-export import <string>;
-export import <vector>;
 
 namespace MasterQian {
 	// 字节集视图
@@ -238,4 +238,51 @@ namespace MasterQian {
 			}
 		}
 	};
+
+	// 文本编码类型
+	export enum class CodePage : mqenum {
+		ANSI = 0U, UTF8 = 65001U
+	};
+
+	/// <summary>
+	/// 字节集转字符串
+	/// </summary>
+	/// <param name="bv">字节集</param>
+	/// <param name="cp">编码，默认为UTF8</param>
+	/// <returns>字符串</returns>
+	export [[nodiscard]] inline std::wstring ToString(BinView bv, CodePage cp = CodePage::UTF8) noexcept {
+		std::wstring tmp;
+		if (auto len{ api::MultiByteToWideChar(static_cast<mqui32>(cp), 0, reinterpret_cast<mqcstra>(bv.data()),
+			static_cast<mqi32>(bv.size32()), nullptr, 0) }; len > 0) {
+			tmp.resize(len);
+			api::MultiByteToWideChar(static_cast<mqui32>(cp), 0, reinterpret_cast<mqcstra>(bv.data()),
+				static_cast<mqi32>(bv.size32()), tmp.data(), len);
+		}
+		return tmp;
+	}
+
+	/// <summary>
+	/// 字符串转字节集
+	/// </summary>
+	/// <param name="sv">字符串</param>
+	/// <param name="cp">编码，默认为UTF8</param>
+	/// <returns>字节集</returns>
+	export [[nodiscard]] inline Bin ToBin(std::wstring_view sv, CodePage cp = CodePage::UTF8) noexcept {
+		Bin tmp;
+		if (auto len{ api::WideCharToMultiByte(static_cast<mqui32>(cp), 0, sv.data(),
+			static_cast<mqui32>(sv.size()), nullptr, 0, nullptr, nullptr) }; len > 0) {
+			tmp.resize(len);
+			api::WideCharToMultiByte(static_cast<mqui32>(cp), 0, sv.data(), static_cast<mqui32>(sv.size()),
+				reinterpret_cast<mqstra>(tmp.data()), len, nullptr, nullptr);
+		}
+		return tmp;
+	}
+}
+
+export [[nodiscard]] inline MasterQian::Bin operator ""_ansi(mqcstr str, mqui64 size) noexcept {
+	return MasterQian::ToBin(std::wstring_view{ str, size }, MasterQian::CodePage::ANSI);
+}
+
+export [[nodiscard]] inline MasterQian::Bin operator ""_utf8(mqcstr str, mqui64 size) noexcept {
+	return MasterQian::ToBin(std::wstring_view{ str, size }, MasterQian::CodePage::UTF8);
 }

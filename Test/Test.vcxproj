@@ -104,6 +104,7 @@
     <ClCompile Include="..\include\MasterQian.System.ixx" />
     <ClCompile Include="..\include\MasterQian.Time.ixx" />
     <ClCompile Include="..\include\MasterQian.Tool.Benchmark.ixx" />
+    <ClCompile Include="..\include\MasterQian.WinRT.ixx" />
     <ClCompile Include="Test.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

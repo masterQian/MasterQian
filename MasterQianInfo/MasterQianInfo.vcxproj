@@ -79,6 +79,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\include\MasterQian.freestanding.ixx" />
+    <ClCompile Include="..\include\MasterQian.Log.ixx" />
     <ClCompile Include="MasterQianInfo.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

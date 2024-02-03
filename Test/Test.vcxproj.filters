@@ -47,6 +47,9 @@
     <ClCompile Include="..\include\MasterQian.Storage.PDF.ixx">
       <Filter>Modules</Filter>
     </ClCompile>
+    <ClCompile Include="..\include\MasterQian.WinRT.ixx">
+      <Filter>Modules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Modules">

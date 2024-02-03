@@ -1,5 +1,8 @@
 module;
 #include "MasterQian.Meta.h"
+#include <string>
+#include <vector>
+#include <unordered_map>
 #define MasterQianModuleName(name) MasterQian_DB_Sqlite_##name
 #define MasterQianModuleNameString(name) "MasterQian_DB_Sqlite_"#name
 #ifdef _DEBUG
@@ -12,9 +15,6 @@ module;
 
 export module MasterQian.DB.Sqlite;
 export import MasterQian.freestanding;
-export import <string>;
-export import <vector>;
-export import <unordered_map>;
 
 namespace MasterQian::DB {
 	namespace details {

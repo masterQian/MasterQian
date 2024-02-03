@@ -1,12 +1,10 @@
-#pragma once
-
+module;
 #include "MasterQian.Meta.h"
+#include <winrt/windows.foundation.h>
+#define MasterQianModuleVersion 20240131ULL
 
-#include "winrt/windows.foundation.h"
-
-#define MasterQianModuleVersion 20240127ULL
-#undef MasterQianModuleVersion
-
+export module MasterQian.WinRT;
+export import MasterQian.freestanding;
 
 /*  --------------------  参数包  --------------------  */
 /// <summary>
@@ -39,7 +37,7 @@ namespace MasterQian::WinRT {
 
 namespace winrt::impl {
     template <>
-    inline constexpr guid guid_v<MasterQian::WinRT::Args>{ 0x2ED4939F, 0xD013, 0x56FD, { 0xAC, 0xB4, 0x87, 0xF2, 0xB1, 0x3A, 0x06, 0xDC } };
+    constexpr guid guid_v<MasterQian::WinRT::Args>{ 0x2ED4939F, 0xD013, 0x56FD, { 0xAC, 0xB4, 0x87, 0xF2, 0xB1, 0x3A, 0x06, 0xDC } };
 
     template <>
     struct abi<MasterQian::WinRT::Args> {
@@ -96,7 +94,7 @@ namespace winrt::impl {
 
 namespace MasterQian::WinRT {
     // 参数包
-    struct Args : winrt::Windows::Foundation::IInspectable {
+    export struct Args : winrt::Windows::Foundation::IInspectable {
     private:
         using this_abi = winrt::impl::abi_t<Args>;
 
@@ -186,7 +184,7 @@ namespace MasterQian::WinRT {
 
 namespace MasterQian::WinRT {
     // 子页面
-    template<std::derived_from<winrt::Windows::Foundation::IInspectable> T, typename U>
+    export template<std::derived_from<winrt::Windows::Foundation::IInspectable> T, typename U>
     struct SubPage : T {
         SubPage() = default;
         static U* From(winrt::Windows::Foundation::IInspectable* subPage) noexcept {
@@ -198,5 +196,5 @@ namespace MasterQian::WinRT {
             d = reinterpret_cast<U const*>(this)->FindName(name).as<D>();
         }
     };
-    using SubPageFunc = void(*)(winrt::Windows::Foundation::IInspectable*) noexcept;
+    export using SubPageFunc = void(*)(winrt::Windows::Foundation::IInspectable*) noexcept;
 }
