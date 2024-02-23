@@ -3,7 +3,7 @@
 
 You need to use a C++20 compiler!
 
-Just introduce the required modules in the VS project, without worrying about whether they are located in the included directory.
+Just import the required modules in the VS project, without worrying about whether they are located in the included directory.
 
 Just carry the corresponding DLL file during runtime, pay attention to the Debug and Release versions. There is no need to use the lib static library to indicate the export name, as this process is dynamically loaded.
 
