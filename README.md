@@ -7,4 +7,5 @@ Just import the required modules in the VS project, without worrying about wheth
 
 Just carry the corresponding DLL file during runtime, pay attention to the Debug and Release versions. There is no need to use the static library to indicate the export name, as this process is dynamically loaded.
 
-Enjoy the joy brought by the C++20 Module to the fullest!
+Enjoy.
+brought by the C++20 Module to the fullest!
