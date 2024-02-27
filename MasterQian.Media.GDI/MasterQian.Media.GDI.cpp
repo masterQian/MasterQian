@@ -4,6 +4,7 @@
 #pragma comment(lib, "gdiplus.lib")
 import MasterQian.freestanding;
 import MasterQian.Media.Color;
+using namespace MasterQian;
 #define MasterQianModuleName(name) MasterQian_Media_GDI_##name
 META_EXPORT_API_VERSION(20240131ULL)
 
@@ -17,7 +18,7 @@ mqui64 GDIHANDLE;
 struct GDIText {
 	mqcstr content;
 	mqui32 size;
-	MasterQian::Media::Color color;
+	Media::Color color;
 	mqcstr font;
 };
 
@@ -80,10 +81,24 @@ static void SetGraphicsMode(Gdiplus::Graphics& graphics, AlgorithmModes mode) {
 	graphics.SetInterpolationMode(mode.interpolation == AlgorithmMode::FAST ?
 		Gdiplus::InterpolationMode::InterpolationModeLowQuality :
 		Gdiplus::InterpolationMode::InterpolationModeHighQualityBicubic);
+	graphics.SetTextRenderingHint(Gdiplus::TextRenderingHintClearTypeGridFit);
 }
 
 static Gdiplus::Bitmap* CreateEmptyBitmap() {
 	return new Gdiplus::Bitmap{ 0, 0 };
+}
+
+template<typename T1, typename T2>
+requires (sizeof(T1) == sizeof(T2))
+inline T1 cast(T2 const& t2) noexcept {
+	T1 t1{ };
+	freestanding::copy(&t1, &t2, sizeof(T1));
+	return t1;
+}
+
+template<>
+inline Gdiplus::PointF cast<Gdiplus::PointF, mqpoint>(mqpoint const& t2) noexcept {
+	return { static_cast<mqf32>(t2.x), static_cast<mqf32>(t2.y) };
 }
 
 META_EXPORT_API(void, StartupGDI) {
@@ -95,8 +110,9 @@ META_EXPORT_API(void, ShutdownGDI) {
 	Gdiplus::GdiplusShutdown(GDIHANDLE);
 }
 
-META_EXPORT_API(Gdiplus::Bitmap*, CreateImageFromSize, mqsize imageSize, MasterQian::Media::Color color) {
-	auto image{ new Gdiplus::Bitmap(imageSize.width, imageSize.height) };
+META_EXPORT_API(Gdiplus::Bitmap*, CreateImageFromSize, mqsize imageSize, Media::Color color) {
+	auto image{ new Gdiplus::Bitmap(
+		static_cast<mqi32>(imageSize.width), static_cast<mqi32>(imageSize.height)) };
 	image->SetResolution(72.0f, 72.0f);
 	Gdiplus::Graphics graphics{ image };
 	Gdiplus::SolidBrush brush{ Gdiplus::Color{ color } };
@@ -192,7 +208,7 @@ META_EXPORT_API(IStream*, SaveToStream, Gdiplus::Bitmap* image, ImageFormat ifmt
 	return stream;
 }
 
-META_EXPORT_API(void, StreamReadRelease, IStream* stream, LPBYTE mem, mqui32 size) {
+META_EXPORT_API(void, StreamReadRelease, IStream* stream, mqbytes mem, mqui32 size) {
 	stream->Read(mem, size, nullptr);
 	stream->Release();
 }
@@ -230,7 +246,7 @@ META_EXPORT_API(Gdiplus::Bitmap*, Crop, Gdiplus::Bitmap* image, mqrect rect, Alg
 	return cropImage;
 }
 
-META_EXPORT_API(Gdiplus::Bitmap*, Border, Gdiplus::Bitmap* image, mqrange pos, MasterQian::Media::Color color, AlgorithmModes mode) {
+META_EXPORT_API(Gdiplus::Bitmap*, Border, Gdiplus::Bitmap* image, mqrange pos, Media::Color color, AlgorithmModes mode) {
 	auto width{ image->GetWidth() }, height{ image->GetHeight() };
 	auto new_width{ width + pos.left + pos.right }, new_height{ height + pos.top + pos.bottom };
 	auto borderImage{ new Gdiplus::Bitmap(new_width, new_height) };
@@ -249,7 +265,7 @@ META_EXPORT_API(Gdiplus::Bitmap*, Border, Gdiplus::Bitmap* image, mqrange pos, M
 	return borderImage;
 }
 
-META_EXPORT_API(Gdiplus::Bitmap*, Rotate, Gdiplus::Bitmap* image, mqf64 angle, MasterQian::Media::Color color, AlgorithmModes mode) {
+META_EXPORT_API(Gdiplus::Bitmap*, Rotate, Gdiplus::Bitmap* image, mqf64 angle, Media::Color color, AlgorithmModes mode) {
 	mqi32 old_width{ static_cast<mqi32>(image->GetWidth()) };
 	mqi32 old_height{ static_cast<mqi32>(image->GetHeight()) };
 
@@ -371,7 +387,7 @@ META_EXPORT_API(Gdiplus::Bitmap*, Combine, Gdiplus::Bitmap* image1, Gdiplus::Bit
 	return combineImage;
 }
 
-META_EXPORT_API(void, DrawLine, Gdiplus::Bitmap* image, mqrect rect, MasterQian::Media::Color color, mqf64 thickness, AlgorithmModes mode) {
+META_EXPORT_API(void, DrawLine, Gdiplus::Bitmap* image, mqrect rect, Media::Color color, mqf64 thickness, AlgorithmModes mode) {
 	Gdiplus::Graphics graphics(image);
 	Gdiplus::Pen pen{ Gdiplus::Color{ color }, static_cast<mqf32>(thickness) };
 	SetGraphicsMode(graphics, mode);
@@ -380,22 +396,21 @@ META_EXPORT_API(void, DrawLine, Gdiplus::Bitmap* image, mqrect rect, MasterQian:
 		static_cast<mqi32>(rect.top + rect.height));
 }
 
-META_EXPORT_API(void, DrawRectangle, Gdiplus::Bitmap* image, mqrect rect, MasterQian::Media::Color color, mqf64 thickness, AlgorithmModes mode) {
+META_EXPORT_API(void, DrawRectangle, Gdiplus::Bitmap* image, mqrect rect, Media::Color color, mqf64 thickness, AlgorithmModes mode) {
 	Gdiplus::Graphics graphics(image);
 	Gdiplus::Pen pen{ Gdiplus::Color{ color }, static_cast<mqf32>(thickness) };
 	SetGraphicsMode(graphics, mode);
-	graphics.DrawRectangle(&pen, static_cast<mqi32>(rect.left), static_cast<mqi32>(rect.top),
-		static_cast<mqi32>(rect.width), static_cast<mqi32>(rect.height));
+	graphics.DrawRectangle(&pen, cast<Gdiplus::Rect>(rect));
 }
 
-META_EXPORT_API(void, DrawRectangles, Gdiplus::Bitmap* image, mqrect const* rects, mqui32 count, MasterQian::Media::Color color, mqf64 thickness, AlgorithmModes mode) {
+META_EXPORT_API(void, DrawRectangles, Gdiplus::Bitmap* image, mqrect const* rects, mqui32 count, Media::Color color, mqf64 thickness, AlgorithmModes mode) {
 	Gdiplus::Graphics graphics(image);
 	Gdiplus::Pen pen{ Gdiplus::Color{ color }, static_cast<mqf32>(thickness) };
 	SetGraphicsMode(graphics, mode);
-	graphics.DrawRectangles(&pen, reinterpret_cast<Gdiplus::Rect const*>(rects), count);
+	graphics.DrawRectangles(&pen, cast<Gdiplus::Rect const*>(rects), count);
 }
 
-META_EXPORT_API(void, DrawCircle, Gdiplus::Bitmap* image, mqpoint point, mqsize r, MasterQian::Media::Color color, mqf64 thickness, AlgorithmModes mode) {
+META_EXPORT_API(void, DrawCircle, Gdiplus::Bitmap* image, mqpoint point, mqsize r, Media::Color color, mqf64 thickness, AlgorithmModes mode) {
 	Gdiplus::Graphics graphics(image);
 	Gdiplus::Pen pen{ Gdiplus::Color{ color }, static_cast<mqf32>(thickness) };
 	SetGraphicsMode(graphics, mode);
@@ -403,7 +418,7 @@ META_EXPORT_API(void, DrawCircle, Gdiplus::Bitmap* image, mqpoint point, mqsize 
 		static_cast<mqf32>(r.width * 2), static_cast<mqf32>(r.height * 2));
 }
 
-META_EXPORT_API(void, DrawString, Gdiplus::Bitmap* image, mqpoint point, mqcstr content, mqui32 size, MasterQian::Media::Color color, mqcstr fontname, AlgorithmModes mode) {
+META_EXPORT_API(void, DrawString, Gdiplus::Bitmap* image, mqpoint point, mqcstr content, mqui32 size, Media::Color color, mqcstr fontname, AlgorithmModes mode) {
 	Gdiplus::Graphics graphics(image);
 	Gdiplus::SolidBrush brush{ Gdiplus::Color{ color } };
 	Gdiplus::Font font{ fontname, static_cast<mqf32>(size) };
@@ -411,14 +426,14 @@ META_EXPORT_API(void, DrawString, Gdiplus::Bitmap* image, mqpoint point, mqcstr 
 	format.SetAlignment(Gdiplus::StringAlignmentCenter);
 	format.SetLineAlignment(Gdiplus::StringAlignmentCenter);
 	SetGraphicsMode(graphics, mode);
-	graphics.DrawString(content, -1, &font, { static_cast<mqf32>(point.x), static_cast<mqf32>(point.y) }, &format, &brush);
+	graphics.DrawString(content, -1, &font, cast<Gdiplus::PointF>(point), &format, &brush);
 }
 
 META_EXPORT_API(void, DrawImage, Gdiplus::Bitmap* image1, Gdiplus::Bitmap* image2, mqpoint point, mqsize size, AlgorithmModes mode) {
 	Gdiplus::Graphics graphics(image1);
 	SetGraphicsMode(graphics, mode);
 	if (size == mqsize{ }) {
-		graphics.DrawImage(image2, Gdiplus::Point{ static_cast<mqi32>(point.x), static_cast<mqi32>(point.y) });
+		graphics.DrawImage(image2, cast<Gdiplus::Point>(point));
 	}
 	else {
 		graphics.DrawImage(image2, Gdiplus::Rect{ static_cast<mqi32>(point.x), static_cast<mqi32>(point.y),
@@ -426,22 +441,21 @@ META_EXPORT_API(void, DrawImage, Gdiplus::Bitmap* image1, Gdiplus::Bitmap* image
 	}
 }
 
-META_EXPORT_API(void, FillRectangle, Gdiplus::Bitmap* image, mqrect rect, MasterQian::Media::Color color, AlgorithmModes mode) {
+META_EXPORT_API(void, FillRectangle, Gdiplus::Bitmap* image, mqrect rect, Media::Color color, AlgorithmModes mode) {
 	Gdiplus::Graphics graphics(image);
 	Gdiplus::SolidBrush brush{ Gdiplus::Color{ color } };
 	SetGraphicsMode(graphics, mode);
-	graphics.FillRectangle(&brush, static_cast<mqi32>(rect.left), static_cast<mqi32>(rect.top),
-		static_cast<mqi32>(rect.width), static_cast<mqi32>(rect.height));
+	graphics.FillRectangle(&brush, cast<Gdiplus::Rect>(rect));
 }
 
-META_EXPORT_API(void, FillRectangles, Gdiplus::Bitmap* image, mqrect const* rects, mqui32 count, MasterQian::Media::Color color, AlgorithmModes mode) {
+META_EXPORT_API(void, FillRectangles, Gdiplus::Bitmap* image, mqrect const* rects, mqui32 count, Media::Color color, AlgorithmModes mode) {
 	Gdiplus::Graphics graphics(image);
 	Gdiplus::SolidBrush brush{ Gdiplus::Color{ color } };
 	SetGraphicsMode(graphics, mode);
-	graphics.FillRectangles(&brush, reinterpret_cast<Gdiplus::Rect const*>(rects), count);
+	graphics.FillRectangles(&brush, cast<Gdiplus::Rect const*>(rects), count);
 }
 
-META_EXPORT_API(void, FillCircle, Gdiplus::Bitmap* image, mqpoint point, mqsize r, MasterQian::Media::Color color, AlgorithmModes mode) {
+META_EXPORT_API(void, FillCircle, Gdiplus::Bitmap* image, mqpoint point, mqsize r, Media::Color color, AlgorithmModes mode) {
 	Gdiplus::Graphics graphics(image);
 	Gdiplus::SolidBrush brush{ Gdiplus::Color{ color } };
 	SetGraphicsMode(graphics, mode);

@@ -85,6 +85,8 @@
   <ItemGroup>
     <ClCompile Include="..\include\MasterQian.freestanding.ixx" />
     <ClCompile Include="MasterQian.System.cpp" />
+    <ClCompile Include="MasterQian.System.MemoryDll.cpp" />
+    <ClCompile Include="MasterQian.System.Shl.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

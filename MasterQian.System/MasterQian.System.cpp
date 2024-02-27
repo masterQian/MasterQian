@@ -91,6 +91,7 @@ META_WINAPI(mqbool, GetClientRect, mqhandle, mqrange*);
 META_WINAPI(mqhandle, GetDesktopWindow);
 META_WINAPI(mqui64, SHAppBarMessage, mqui32, LPAPPBARDATA);
 META_WINAPI(mqbool, GetUserNameW, mqstr, mqui32*);
+META_WINAPI(mqbool, GetComputerNameW, mqstr, mqui32*);
 META_WINAPI(mqhandle, FindResourceW, mqhandle, mqcstr, mqcstr);
 META_WINAPI(mqhandle, LoadResource, mqhandle, mqhandle);
 META_WINAPI(mqmem, LockResource, mqhandle);
@@ -135,6 +136,7 @@ META_WINAPI(mqui64, SendMessageTimeoutW, mqhandle, mqui32, mqui64, mqui64, mqui3
 #pragma comment(linker,"/alternatename:__imp_?GetDesktopWindow@@YAPEAXXZ=__imp_GetDesktopWindow")
 #pragma comment(linker,"/alternatename:__imp_?GetClientRect@@YAHPEAXPEAUmqrange@@@Z=__imp_GetClientRect")
 #pragma comment(linker,"/alternatename:__imp_?GetUserNameW@@YAHPEA_WPEAI@Z=__imp_GetUserNameW")
+#pragma comment(linker,"/alternatename:__imp_?GetComputerNameW@@YAHPEA_WPEAI@Z=__imp_GetComputerNameW")
 #pragma comment(linker,"/alternatename:__imp_?SHAppBarMessage@@YA_KIPEAUAPPBARDATA@@@Z=__imp_SHAppBarMessage")
 #pragma comment(linker,"/alternatename:__imp_?SizeofResource@@YAIPEAX0@Z=__imp_SizeofResource")
 #pragma comment(linker,"/alternatename:__imp_?TerminateProcess@@YAHPEAXI@Z=__imp_TerminateProcess")
@@ -314,7 +316,7 @@ META_EXPORT_API(mqbool, SetClipboardFiles, mqcstr filesData, mqui64 len) {
 /*    Info    */
 
 META_EXPORT_API(mqui32, GetScreenWidth) {
-	static freestanding::mqinit<mqui32> width{ [ ]() noexcept {
+	static mqinit<mqui32> width{ [ ]() noexcept {
 		mqrange rect;
 		GetClientRect(GetDesktopWindow(), &rect);
 		return rect.right - rect.left;
@@ -323,7 +325,7 @@ META_EXPORT_API(mqui32, GetScreenWidth) {
 }
 
 META_EXPORT_API(mqui32, GetScreenHeight) {
-	static freestanding::mqinit<mqui32> height{ [ ]() noexcept {
+	static mqinit<mqui32> height{ [ ]() noexcept {
 		mqrange rect;
 		GetClientRect(GetDesktopWindow(), &rect);
 		return rect.bottom - rect.top;
@@ -332,7 +334,7 @@ META_EXPORT_API(mqui32, GetScreenHeight) {
 }
 
 META_EXPORT_API(mqui32, GetTaskBarHeight) {
-	static freestanding::mqinit<mqui32> taskbar_height{ [ ]()noexcept {
+	static mqinit<mqui32> taskbar_height{ [ ]()noexcept {
 		APPBARDATA data{ };
 		data.cbSize = sizeof(APPBARDATA);
 		SHAppBarMessage(5U, &data);
@@ -349,6 +351,11 @@ META_EXPORT_API(mqui32, GetTaskBarHeight) {
 META_EXPORT_API(void, GetCurrentUserName, mqstr name) {
 	mqui32 count{ api::PATH_MAX_SIZE };
 	GetUserNameW(name, &count);
+}
+
+META_EXPORT_API(void, GetCurrentComputerName, mqstr name) {
+	mqui32 count{ api::PATH_MAX_SIZE };
+	GetComputerNameW(name, &count);
 }
 
 

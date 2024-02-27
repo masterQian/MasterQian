@@ -1,7 +1,6 @@
 ﻿#include "../include/MasterQian.Meta.h"
 #include "zip.h"
 #include "unzip.h"
-#include <string>
 #ifdef _DEBUG
 #pragma comment(lib, "zlibstatd.lib")
 #else
@@ -298,9 +297,12 @@ META_EXPORT_API(ZPOS64_T, UnZipCount, unzFile handle) {
 }
 
 static void SaveMultiFolderFile(mqcstr file_path, mqbytes mem, mqui32 size) noexcept {
-	mqchar tmp[api::PATH_MAX_SIZE]{ }, * p = tmp;
+	mqchar tmp[api::PATH_MAX_SIZE]{ };
 	api::lstrcpyW(tmp, file_path);
-	while (*p++) {
+	for (auto p{ tmp }; *p; ++p) {
+		if (*p == L'/') {
+			*p = L'\\';
+		}
 		if (*p == L'\\') {
 			*p = L'\0';
 			if (GetFileAttributesW(tmp) == INVALID_FILE_ATTRIBUTES) {
@@ -327,26 +329,12 @@ META_EXPORT_API(mqbool, UnZipSave, unzFile handle, mqcstr path) {
 	}
 	unz_file_info64 file_info;
 	mqchara name[api::PATH_MAX_SIZE];
-	std::basic_string<mqbyte> fileData;
+	mqchar file_path_w[api::PATH_MAX_SIZE]{ };
+	mqbuffer fileData;
 	if (unzGetCurrentFileInfo64(handle, &file_info, name, api::PATH_MAX_SIZE, nullptr, 0U, nullptr, 0U) != UNZ_OK) {
 		return false;
 	}
-	if (unzOpenCurrentFile(handle) != UNZ_OK) {
-		return false;
-	}
-	fileData.reserve(file_info.uncompressed_size);
-	if (unzReadCurrentFile(handle, fileData.data(), static_cast<mqui32>(file_info.uncompressed_size)) <= 0) {
-		unzCloseCurrentFile(handle);
-		return false;
-	}
-	api::lstrcpyA(file_path, ansi_path);
-	api::lstrcatA(file_path, name);
-	mqchar file_path_w[api::PATH_MAX_SIZE]{ };
-	SaveMultiFolderFile(ATW(file_path, file_path_w), fileData.data(), static_cast<mqui32>(file_info.uncompressed_size));
-	while (unzGoToNextFile(handle) == UNZ_OK) {
-		if (unzGetCurrentFileInfo64(handle, &file_info, name, api::PATH_MAX_SIZE, nullptr, 0U, nullptr, 0U) != UNZ_OK) {
-			return false;
-		}
+	if (file_info.uncompressed_size) {
 		if (unzOpenCurrentFile(handle) != UNZ_OK) {
 			return false;
 		}
@@ -358,6 +346,24 @@ META_EXPORT_API(mqbool, UnZipSave, unzFile handle, mqcstr path) {
 		api::lstrcpyA(file_path, ansi_path);
 		api::lstrcatA(file_path, name);
 		SaveMultiFolderFile(ATW(file_path, file_path_w), fileData.data(), static_cast<mqui32>(file_info.uncompressed_size));
+	}
+	while (unzGoToNextFile(handle) == UNZ_OK) {
+		if (unzGetCurrentFileInfo64(handle, &file_info, name, api::PATH_MAX_SIZE, nullptr, 0U, nullptr, 0U) != UNZ_OK) {
+			return false;
+		}
+		if (file_info.uncompressed_size) {
+			if (unzOpenCurrentFile(handle) != UNZ_OK) {
+				return false;
+			}
+			fileData.reserve(file_info.uncompressed_size);
+			if (unzReadCurrentFile(handle, fileData.data(), static_cast<mqui32>(file_info.uncompressed_size)) <= 0) {
+				unzCloseCurrentFile(handle);
+				return false;
+			}
+			api::lstrcpyA(file_path, ansi_path);
+			api::lstrcatA(file_path, name);
+			SaveMultiFolderFile(ATW(file_path, file_path_w), fileData.data(), static_cast<mqui32>(file_info.uncompressed_size));
+		}
 	}
 	return true;
 }
@@ -375,28 +381,12 @@ META_EXPORT_API(mqbool, UnZipSaveWithCallback, unzFile handle, mqcstr path, UnZi
 	}
 	unz_file_info64 file_info;
 	mqchara name[api::PATH_MAX_SIZE];
-	std::basic_string<mqbyte> fileData;
+	mqchar file_path_w[api::PATH_MAX_SIZE]{ };
+	mqbuffer fileData;
 	if (unzGetCurrentFileInfo64(handle, &file_info, name, api::PATH_MAX_SIZE, nullptr, 0U, nullptr, 0U) != UNZ_OK) {
 		return false;
 	}
-	if (unzOpenCurrentFile(handle) != UNZ_OK) {
-		return false;
-	}
-	fileData.reserve(file_info.uncompressed_size);
-	if (unzReadCurrentFile(handle, fileData.data(), static_cast<mqui32>(file_info.uncompressed_size)) <= 0) {
-		unzCloseCurrentFile(handle);
-		return false;
-	}
-	api::lstrcpyA(file_path, ansi_path);
-	api::lstrcatA(file_path, name);
-	mqchar file_path_w[api::PATH_MAX_SIZE]{ };
-	SaveMultiFolderFile(ATW(file_path, file_path_w), fileData.data(), static_cast<mqui32>(file_info.uncompressed_size));
-
-	func(arg, ATW(name, unicode_name), ATW(file_path, unicode_file_path));
-	while (unzGoToNextFile(handle) == UNZ_OK) {
-		if (unzGetCurrentFileInfo64(handle, &file_info, name, api::PATH_MAX_SIZE, nullptr, 0U, nullptr, 0U) != UNZ_OK) {
-			return false;
-		}
+	if (file_info.uncompressed_size) {
 		if (unzOpenCurrentFile(handle) != UNZ_OK) {
 			return false;
 		}
@@ -408,7 +398,27 @@ META_EXPORT_API(mqbool, UnZipSaveWithCallback, unzFile handle, mqcstr path, UnZi
 		api::lstrcpyA(file_path, ansi_path);
 		api::lstrcatA(file_path, name);
 		SaveMultiFolderFile(ATW(file_path, file_path_w), fileData.data(), static_cast<mqui32>(file_info.uncompressed_size));
+
 		func(arg, ATW(name, unicode_name), ATW(file_path, unicode_file_path));
+	}
+	while (unzGoToNextFile(handle) == UNZ_OK) {
+		if (unzGetCurrentFileInfo64(handle, &file_info, name, api::PATH_MAX_SIZE, nullptr, 0U, nullptr, 0U) != UNZ_OK) {
+			return false;
+		}
+		if (file_info.uncompressed_size) {
+			if (unzOpenCurrentFile(handle) != UNZ_OK) {
+				return false;
+			}
+			fileData.reserve(file_info.uncompressed_size);
+			if (unzReadCurrentFile(handle, fileData.data(), static_cast<mqui32>(file_info.uncompressed_size)) <= 0) {
+				unzCloseCurrentFile(handle);
+				return false;
+			}
+			api::lstrcpyA(file_path, ansi_path);
+			api::lstrcatA(file_path, name);
+			SaveMultiFolderFile(ATW(file_path, file_path_w), fileData.data(), static_cast<mqui32>(file_info.uncompressed_size));
+			func(arg, ATW(name, unicode_name), ATW(file_path, unicode_file_path));
+		}
 	}
 	return true;
 }

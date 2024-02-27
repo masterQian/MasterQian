@@ -38,6 +38,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MasterQian.Storage.PDF", "M
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MasterQian.System", "MasterQian.System\MasterQian.System.vcxproj", "{8B65323E-1D0B-4148-884B-F04C2FEAA123}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MasterQian.Media.Graph", "MasterQian.Media.Graph\MasterQian.Media.Graph.vcxproj", "{DE7FF00F-5D12-41E4-90CF-69FDC397231D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -126,6 +128,14 @@ Global
 		{8B65323E-1D0B-4148-884B-F04C2FEAA123}.Release|x64.Build.0 = Release|x64
 		{8B65323E-1D0B-4148-884B-F04C2FEAA123}.Release|x86.ActiveCfg = Release|x64
 		{8B65323E-1D0B-4148-884B-F04C2FEAA123}.Release|x86.Build.0 = Release|x64
+		{DE7FF00F-5D12-41E4-90CF-69FDC397231D}.Debug|x64.ActiveCfg = Debug|x64
+		{DE7FF00F-5D12-41E4-90CF-69FDC397231D}.Debug|x64.Build.0 = Debug|x64
+		{DE7FF00F-5D12-41E4-90CF-69FDC397231D}.Debug|x86.ActiveCfg = Debug|x64
+		{DE7FF00F-5D12-41E4-90CF-69FDC397231D}.Debug|x86.Build.0 = Debug|x64
+		{DE7FF00F-5D12-41E4-90CF-69FDC397231D}.Release|x64.ActiveCfg = Release|x64
+		{DE7FF00F-5D12-41E4-90CF-69FDC397231D}.Release|x64.Build.0 = Release|x64
+		{DE7FF00F-5D12-41E4-90CF-69FDC397231D}.Release|x86.ActiveCfg = Release|x64
+		{DE7FF00F-5D12-41E4-90CF-69FDC397231D}.Release|x86.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -139,6 +149,7 @@ Global
 		{1A657863-1F1C-4E0D-977B-2F6D3FF7B415} = {E8A9EEA9-4BA5-40CF-93DC-EFBBC9E3A092}
 		{55F47A2F-5E32-4AB3-8116-BB9EAAB1C9D5} = {9F92B73E-66EE-4BED-9571-75174FFB4C58}
 		{8B65323E-1D0B-4148-884B-F04C2FEAA123} = {C23BA001-AC28-4A3D-A831-4ABCD5F30AA5}
+		{DE7FF00F-5D12-41E4-90CF-69FDC397231D} = {AF533ABC-1787-46CD-8750-AE1B65E116D9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {79712723-2F78-4143-94B5-99869D927471}

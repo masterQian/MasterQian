@@ -68,5 +68,6 @@ META_EXPORT_API(mqbool, QueryHasRow, sqlite3_stmt* stmt) {
 }
 
 META_EXPORT_API(mqcstr, QueryRow, sqlite3_stmt* stmt, mqui32 col) {
-	return static_cast<mqcstr>(sqlite3_column_text16(stmt, static_cast<mqi32>(col)));
+	auto str{ static_cast<mqcstr>(sqlite3_column_text16(stmt, static_cast<mqi32>(col))) };
+	return str ? str : L"";
 }
