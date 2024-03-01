@@ -8,7 +8,7 @@ module;
 #else
 #define MasterQianLibString "MasterQian.System.dll"
 #endif
-#define MasterQianModuleVersion 20240131ULL
+#define MasterQianModuleVersion 20240301ULL
 #pragma message("！！！！！！！！！！ Please copy [" MasterQianLibString "] into your program folder ！！！！！！！！！！")
 
 export module MasterQian.System;
@@ -84,6 +84,7 @@ namespace MasterQian::System {
 		META_IMPORT_API(mqbool, RegGetKeyValueMaxSize, mqhandle, mqui32*, mqui32*);
 		META_IMPORT_API(mqui32, RegEnumKey, mqhandle, mqui32, mqui32, mqstr, mqui32*);
 		META_IMPORT_API(void, FlushEnvironment);
+
 		META_IMPORT_API(void, MemoryFreeLibrary, mqhandle);
 		META_IMPORT_API(mqhandle, MemoryLoadLibrary, mqcmem, mqui64);
 		META_IMPORT_API(mqproc, MemoryGetProcAddress, mqhandle, mqcstra);
@@ -721,7 +722,7 @@ namespace MasterQian::System {
 			return reinterpret_cast<Ret(__stdcall*)(Args...)>(details::MasterQian_System_MemoryGetProcAddress(handle, reinterpret_cast<mqcstra>(ansi_name.data())));
 		}
 
-		mqi32 Main() const noexcept {
+		mqi32 Execute() const noexcept {
 			return details::MasterQian_System_MemoryCallEntryPoint(handle);
 		}
 

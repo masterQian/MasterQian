@@ -26,13 +26,13 @@
 
 
 #include "../include/MasterQian.Meta.h"
-#include <windows.h>
+#include <Windows.h>
 import MasterQian.freestanding;
 using namespace MasterQian;
 #define MasterQianModuleName(name) MasterQian_System_##name
 
-typedef void* HMEMORYMODULE;
-typedef void* HMEMORYRSRC;
+using HMEMORYMODULE = void*;
+using HMEMORYRSRC = void*;
 
 struct ExportNameEntry {
     LPCSTR name;
@@ -74,15 +74,15 @@ inline constexpr uintptr_t AlignValueDown(uintptr_t value, uintptr_t alignment) 
     return value & ~(alignment - 1);
 }
 
-static inline LPVOID AlignAddressDown(LPVOID address, uintptr_t alignment) {
+inline LPVOID AlignAddressDown(LPVOID address, uintptr_t alignment) {
     return (LPVOID)AlignValueDown((uintptr_t)address, alignment);
 }
 
-static inline size_t AlignValueUp(size_t value, size_t alignment) {
+inline size_t AlignValueUp(size_t value, size_t alignment) {
     return (value + alignment - 1) & ~(alignment - 1);
 }
 
-static inline void* OffsetPointer(void* data, ptrdiff_t offset) {
+inline void* OffsetPointer(void* data, ptrdiff_t offset) {
     return (void*)((uintptr_t)data + offset);
 }
 
@@ -97,7 +97,7 @@ static void FreePointerList(POINTER_LIST* head) {
     }
 }
 
-inline static BOOL CheckSize(size_t size, size_t expected) {
+inline BOOL CheckSize(size_t size, size_t expected) {
     if (size < expected) {
         SetLastError(ERROR_INVALID_DATA);
         return false;
@@ -617,13 +617,13 @@ META_EXPORT_API(FARPROC, MemoryGetProcAddress, HMEMORYMODULE mod, LPCSTR name) {
         return nullptr;
     }
     else {
-        const struct ExportNameEntry* found;
+        const ExportNameEntry* found;
 
         if (!module->nameExportsTable) {
             DWORD i;
             DWORD* nameRef = (DWORD*)(codeBase + exports->AddressOfNames);
             WORD* ordinal = (WORD*)(codeBase + exports->AddressOfNameOrdinals);
-            struct ExportNameEntry* entry = (struct ExportNameEntry*)malloc(exports->NumberOfNames * sizeof(struct ExportNameEntry));
+            ExportNameEntry* entry = (ExportNameEntry*)malloc(exports->NumberOfNames * sizeof(ExportNameEntry));
             module->nameExportsTable = entry;
             if (!entry) {
                 SetLastError(ERROR_OUTOFMEMORY);
@@ -635,15 +635,15 @@ META_EXPORT_API(FARPROC, MemoryGetProcAddress, HMEMORYMODULE mod, LPCSTR name) {
             }
             qsort(module->nameExportsTable,
                 exports->NumberOfNames,
-                sizeof(struct ExportNameEntry), [] (mqcmem a, mqcmem b) {
+                sizeof(ExportNameEntry), [] (mqcmem a, mqcmem b) {
                 return lstrcmpA(static_cast<ExportNameEntry const*>(a)->name, static_cast<ExportNameEntry const*>(b)->name);
             });
         }
 
-        found = (const struct ExportNameEntry*)bsearch(&name,
+        found = (const ExportNameEntry*)bsearch(&name,
             module->nameExportsTable,
             exports->NumberOfNames,
-            sizeof(struct ExportNameEntry), [ ] (mqcmem a, mqcmem b) {
+            sizeof(ExportNameEntry), [ ] (mqcmem a, mqcmem b) {
             return lstrcmpA(*static_cast<LPCSTR const*>(a), static_cast<const ExportNameEntry*>(b)->name);
         });
         if (!found) {

@@ -264,10 +264,10 @@ export namespace MasterQian {
 	};
 
 	// 控制台日志，将在stdout输出
-	using ConsoleLogger = Logger<LogType::STD_CONSOLE>;
+	inline Logger<LogType::STD_CONSOLE> console;
 
 	// 调试窗口日志，将在debug窗口输出
-	using DebugLogger = Logger<LogType::DEBUG_CONSOLE>;
+	inline Logger<LogType::DEBUG_CONSOLE> debug;
 
 	// 文件日志，指定文件输出
 	using FileLogger = Logger<LogType::FILE>;

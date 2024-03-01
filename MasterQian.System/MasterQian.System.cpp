@@ -2,7 +2,7 @@
 import MasterQian.freestanding;
 using namespace MasterQian;
 #define MasterQianModuleName(name) MasterQian_System_##name
-META_EXPORT_API_VERSION(20240131ULL)
+META_EXPORT_API_VERSION(20240301ULL)
 
 constexpr mqui32 MOUSEEVENTF_ABSOLUTE{ 0x8000U };
 constexpr mqui32 MOUSEEVENTF_LEFTDOWN{ 0x0002U };

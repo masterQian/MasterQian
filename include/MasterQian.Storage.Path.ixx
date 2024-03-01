@@ -66,10 +66,6 @@ namespace MasterQian::Storage {
 			META_PROC_API(AutoCurrentFolder);
 		META_MODULE_END
 	}
-#undef MasterQianModuleName
-#undef MasterQianModuleNameString
-#undef MasterQianLibString
-#undef MasterQianModuleVersion
 
 	// Â·¾¶
 	export struct Path {

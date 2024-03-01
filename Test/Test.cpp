@@ -6,13 +6,11 @@ import MasterQian.Time;
 import MasterQian.System;
 using namespace MasterQian;
 
-ConsoleLogger logger;
-
 #if 0
 #else
 #pragma optimize("",off)
 #endif
 int main() {
-	logger.i(L"123"_utf8);
+	console.i(L"123"_utf8);
 	return 0;
 }
